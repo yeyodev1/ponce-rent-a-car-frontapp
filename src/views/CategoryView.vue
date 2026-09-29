@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from '@/i18n'
 import { money } from '@/utils/format'
 import { useCategoryPage } from '@/composables/content/useCategoryPage'
@@ -15,6 +15,9 @@ import CtaBand from '@/components/content/CtaBand.vue'
 
 const { t, tx } = useI18n()
 const { slug, category, name, images, loading, notFound, schema } = useCategoryPage()
+
+// La barra fija solo aparece cuando el resumen (con su propio CTA) sale de pantalla.
+const summaryEl = ref<HTMLElement | null>(null)
 
 const features = computed(() => (category.value?.features || []).map((f) => tx(f)).filter(Boolean))
 
@@ -53,7 +56,7 @@ usePageSeo({
           <div class="cat__gallery">
             <CategoryGallery :images="images" :name="name" />
           </div>
-          <aside class="cat__aside">
+          <aside ref="summaryEl" class="cat__aside">
             <CategorySummary :category="category" :name="name" />
           </aside>
         </div>
@@ -116,6 +119,7 @@ usePageSeo({
       :slug="category.slug"
       :name="name"
       :price="category.pricePerDay"
+      :anchor="summaryEl"
     />
   </div>
 </template>
