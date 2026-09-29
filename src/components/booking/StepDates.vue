@@ -44,25 +44,25 @@ watch(returnMin, (min) => {
 </script>
 
 <template>
-  <div class="dates">
-    <section class="dates__block">
-      <h2 class="dates__label"><i class="fa-solid fa-arrow-right-from-bracket"></i>{{ t('booking.dates.pickup') }}</h2>
+  <div class="when">
+    <section class="when__block">
+      <h2 class="when__label"><i class="fa-solid fa-arrow-right-from-bracket"></i>{{ t('booking.dates.pickup') }}</h2>
       <DateStrip v-model="booking.pickupDate" :days="pickupDays" :allow-far="false" />
-      <p v-if="noSlotsToday" class="dates__warn"><i class="fa-regular fa-clock"></i>{{ t('booking.dates.noSlotsToday') }}</p>
+      <p v-if="noSlotsToday" class="when__warn"><i class="fa-regular fa-clock"></i>{{ t('booking.dates.noSlotsToday') }}</p>
       <TimeSelect v-else v-model="booking.pickupTime" :from="OPEN_HOUR" :to="CLOSE_HOUR" :min-time="pickupMin" />
-      <RouterLink to="/ayudame-a-elegir" class="dates__later" :class="{ 'dates__later--loud': tooFar }">
-        <span class="dates__later-icon"><i class="fa-solid fa-headset"></i></span>
-        <span class="dates__later-text">
+      <RouterLink to="/ayudame-a-elegir" class="when__later" :class="{ 'when__later--loud': tooFar }">
+        <span class="when__later-icon"><i class="fa-solid fa-headset"></i></span>
+        <span class="when__later-text">
           <strong>{{ t('booking.dates.laterTitle') }}</strong>
           <span>{{ t('booking.dates.laterBody') }}</span>
         </span>
-        <span class="dates__later-cta">{{ t('booking.dates.laterCta') }} <i class="fa-solid fa-arrow-right"></i></span>
+        <span class="when__later-cta">{{ t('booking.dates.laterCta') }} <i class="fa-solid fa-arrow-right"></i></span>
       </RouterLink>
     </section>
 
-    <section class="dates__block">
-      <div class="dates__row">
-        <h2 class="dates__label"><i class="fa-solid fa-arrow-right-to-bracket"></i>{{ t('booking.dates.return') }}</h2>
+    <section class="when__block">
+      <div class="when__row">
+        <h2 class="when__label"><i class="fa-solid fa-arrow-right-to-bracket"></i>{{ t('booking.dates.return') }}</h2>
         <Transition name="price-bump" mode="out-in">
           <span v-if="localDays" :key="localDays" class="chip chip--blue">
             <i class="fa-regular fa-calendar-check"></i>{{ daysLabel }}
@@ -73,11 +73,11 @@ watch(returnMin, (min) => {
       <TimeSelect v-model="booking.returnTime" :from="OPEN_HOUR" :to="CLOSE_HOUR" :min-time="returnMin" />
     </section>
 
-    <TransitionGroup name="rise" tag="div" class="dates__errors">
-      <div v-for="e in quoteErrors" :key="e.code + e.text" class="dates__error" role="alert">
+    <TransitionGroup name="rise" tag="div" class="when__errors">
+      <div v-for="e in quoteErrors" :key="e.code + e.text" class="when__error" role="alert">
         <i class="fa-solid fa-circle-exclamation"></i>
         <span>{{ e.text }}</span>
-        <button v-if="e.code === 'unavailable'" type="button" class="dates__error-cta" @click="emit('goto', 1)">
+        <button v-if="e.code === 'unavailable'" type="button" class="when__error-cta" @click="emit('goto', 1)">
           {{ t('booking.errors.changeCategory') }}
         </button>
       </div>
@@ -88,7 +88,7 @@ watch(returnMin, (min) => {
 </template>
 
 <style scoped lang="scss">
-.dates {
+.when {
   @include flex(column, stretch, flex-start, 1.75rem);
 
   &__block {
