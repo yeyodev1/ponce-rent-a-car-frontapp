@@ -143,12 +143,9 @@ export const quoteInput = computed<QuoteInput | null>(() => {
 
 export const needsAddress = computed(() => booking.pickupLocation === 'hotel' || booking.pickupLocation === 'other')
 
+/** PhoneInput ya entrega E.164 (+593991234567): se manda tal cual. */
 export function driverPhone(): string {
-  const prefix = booking.driver.phonePrefix.replace(/[^\d+]/g, '')
-  let number = booking.driver.phone.replace(/\D/g, '')
-  // En Ecuador se marca 09...; con el +593 delante el 0 sobra.
-  if (prefix === '+593' && number.startsWith('0')) number = number.slice(1)
-  return `${prefix}${number}`
+  return booking.driver.phone
 }
 
 /** Firma de lo que define el precio y al conductor: si cambia, la reserva ya no sirve. */
