@@ -64,7 +64,9 @@ const screens = computed(() => {
 
 onMounted(() => {
   const q = route.query
-  setEntry(String(q.categoria || ''), String(q.promo || ''))
+  // "30 " llega así cuando el + de ?duracion=30+ no se codificó en el enlace.
+  const duration = String(q.duracion || '').replace(/ $/, '+')
+  setEntry(String(q.categoria || ''), String(q.promo || ''), String(q.lugar || ''), duration)
   if (!q.paso) router.replace(stepQuery(1))
   track('route_a_start', { step: step.value })
 })
