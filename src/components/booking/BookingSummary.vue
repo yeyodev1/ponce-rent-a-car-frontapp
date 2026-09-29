@@ -116,8 +116,8 @@ const hasTotal = computed(() => props.pricing.total > 0 && props.pricing.state !
     color: $ink-soft;
 
     li {
+      // Sin capitalize: convertía "Aeropuerto de Guayaquil" en "…De…" y "a. m." en "A. M.".
       @include flex(row, center, flex-start, 0.6rem);
-      text-transform: capitalize;
     }
 
     i {
