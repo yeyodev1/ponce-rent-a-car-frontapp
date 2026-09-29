@@ -1,44 +1,61 @@
-// Paleta de Ponce's Rent a Car. Semántica primero: los componentes hablan de tinta,
-// papel y acento, no de "rosa" o "gris 700".
+// Paleta de Ponce's Rent a Car: azul noche de Guayaquil + amarillo señal.
+// Semántica primero: los componentes hablan de tinta, papel y acento.
 @use 'sass:color';
 
-// Acento de marca
-$accent: #ffc400;
-$accent-deep: color.adjust($accent, $lightness: -12%);
-$accent-soft: color.mix($accent, #ffffff, 14%);
+// Marca
+$navy: #06173a; // fondo profundo, hero, footer
+$navy-2: #0c2657; // superficies oscuras elevadas
+$navy-3: #163a7a; // bordes sobre oscuro
+$blue: #1f5bff; // acción secundaria (Ruta B)
+$blue-deep: #1542c9;
+$blue-soft: #e8efff;
+$red: #e5213b; // detalle del logo, alertas de marca
+$whatsapp: #1fb855;
+$whatsapp-deep: #178f42;
 
-// Superficies
-$paper: #fdfcfa; // fondo base
-$surface: #ffffff; // superficies elevadas
-$sand: #f1ece6; // bloques suaves
-$line: #e7e1d9; // bordes
+// Acento principal (CTA)
+$accent: #ffc400;
+$accent-deep: #e0a800;
+$accent-soft: #fff6d6;
+$on-accent: $navy;
+
+// Superficies claras
+$paper: #f4f6fb; // fondo base
+$surface: #ffffff; // tarjetas
+$sand: #eaeef7; // bloques suaves
+$line: #dde3ef; // bordes
+$line-strong: #c4cde0;
 
 // Texto
-$ink: #191423; // texto principal
-$ink-soft: #4a4552; // texto secundario
-$ink-muted: #8a8590; // terciario / labels
+$ink: #0b1630;
+$ink-soft: #3d4a66;
+$ink-muted: #7a869f;
+$on-dark: #eef3ff;
+$on-dark-soft: rgba(#eef3ff, 0.72);
 
-$overlay: rgba(#100c14, 0.55);
+$overlay: rgba(#030b1f, 0.6);
 
 // Estados
-$success: #3bb77e;
-$warning: #d9a441;
-$info: #6a8caf;
-$danger: #c2554f;
+$success: #16a36a;
+$warning: #e39b00;
+$info: #2f6fe0;
+$danger: #d93446;
 $success-bg: rgba($success, 0.12);
-$warning-bg: rgba($warning, 0.12);
+$warning-bg: rgba($warning, 0.14);
 $info-bg: rgba($info, 0.12);
 $danger-bg: rgba($danger, 0.12);
 
 // Compatibilidad con el scaffold base
 $primary: $accent;
-$primary-dark: $ink;
+$primary-dark: $navy;
 $primary-light: $paper;
 $white: $surface;
 $text-light: $surface;
 $text-secondary: $ink-soft;
 
-// Sombras — suaves, nada de "card de dashboard"
-$shadow-sm: 0 1px 2px rgba($ink, 0.04), 0 4px 12px rgba($ink, 0.04);
-$shadow-md: 0 2px 6px rgba($ink, 0.05), 0 18px 40px rgba($ink, 0.08);
-$shadow-lg: 0 30px 70px rgba($ink, 0.14);
+// Sombras con tinte azul: se sienten "de marca" y no grises
+$shadow-sm: 0 1px 2px rgba($navy, 0.06), 0 4px 14px rgba($navy, 0.06);
+$shadow-md: 0 2px 6px rgba($navy, 0.06), 0 16px 36px rgba($navy, 0.1);
+$shadow-lg: 0 30px 70px rgba($navy, 0.22);
+$shadow-glow: 0 10px 30px rgba($accent, 0.38);
+$shadow-blue: 0 10px 30px rgba($blue, 0.32);
