@@ -24,7 +24,14 @@ const loading = ref(true)
 const code = computed(() => String(route.params.code || ''))
 const token = computed(() => (typeof route.query.t === 'string' ? route.query.t : ''))
 
-useSeo(() => ({ title: res.value ? `${t('booking.review.code')} ${res.value.code}` : t('booking.reservation.loading'), noindex: true }))
+useSeo(() => ({
+  title: res.value
+    ? `${t('booking.review.code')} ${res.value.code}`
+    : loading.value
+      ? t('booking.reservation.loading')
+      : t('booking.reservation.notFound'),
+  noindex: true,
+}))
 
 const CONFIRMED = ['confirmed', 'delivered', 'completed']
 const kind = computed(() => {
@@ -150,7 +157,8 @@ const bookAgain = () => router.push({ path: '/reservar', query: { categoria: res
   width: 100%;
   max-width: 560px;
   margin-inline: auto;
-  padding: 1.5rem 1.25rem calc(3rem + var(--tabbar-h));
+  // El header es fijo y superpuesto: la vista deja su hueco arriba.
+  padding: calc(var(--header-h) + 1.5rem) 1.25rem calc(3rem + var(--tabbar-h));
 
   &__state,
   &__wrap,
