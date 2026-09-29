@@ -1,6 +1,108 @@
 // Namespace "routeA". Mantener las mismas claves en es y en.
-const es = {}
+const es = {
+  seo: {
+    title: 'Ayúdame a elegir',
+    description: 'Responde 3 preguntas y un asesor te recomienda el vehículo ideal para tu viaje en Guayaquil.',
+  },
+  eyebrow: 'Ayúdame a elegir',
+  when: {
+    title: '¿Cuándo necesitas el vehículo?',
+    subtitle: 'Una fecha aproximada basta. Lo afinamos contigo.',
+    date: 'Fecha de inicio',
+    time: 'Hora aproximada',
+    duration: '¿Por cuántos días?',
+  },
+  where: {
+    title: '¿Dónde te gustaría recibir el vehículo?',
+    subtitle: 'No necesitamos la dirección exacta todavía.',
+    airport: 'Te lo entregamos a la salida de tu vuelo',
+    office: 'Retíralo en nuestra oficina',
+    hotel: 'Lo llevamos a donde te hospedas',
+    other: 'Lo coordinamos con tu asesor',
+  },
+  who: {
+    title: '¿Cuántas personas viajarán?',
+    subtitle: 'Así te sugerimos el tamaño correcto.',
+    hint12: 'Económico o sedán',
+    hint35: 'Sedán o SUV',
+    hint6: 'Van',
+    saving: 'Guardando tus respuestas…',
+    error: 'No pudimos guardar tus respuestas. Revisa tu conexión.',
+    fallback: 'Escribirnos por WhatsApp de todos modos',
+  },
+  channel: {
+    eyebrow: '¡Listo! Ya casi',
+    code: 'Tu código',
+    codeHint: 'Menciónalo y tu asesor verá tus respuestas.',
+    edit: 'Cambiar respuestas',
+    prefix: 'Código de país',
+    cancel: 'Cancelar',
+    doneTitle: '¡Solicitud recibida!',
+    doneBack: 'Volver al inicio',
+    whatsappAgain: 'Mientras tanto, escríbenos por WhatsApp',
+  },
+  message: {
+    intro: 'Hola, quiero alquilar un vehículo.',
+    code: 'Mi código: {code}.',
+    date: 'Fecha: {date} {time}.',
+    duration: 'Duración: {duration}.',
+    location: 'Entrega: {location}.',
+    passengers: 'Pasajeros: {passengers}.',
+    category: 'Me interesa: {category}.',
+  },
+}
 
-const en: typeof es = {}
+const en: typeof es = {
+  seo: {
+    title: 'Help me choose',
+    description: 'Answer 3 quick questions and an agent will recommend the right vehicle for your trip in Guayaquil.',
+  },
+  eyebrow: 'Help me choose',
+  when: {
+    title: 'When do you need the vehicle?',
+    subtitle: 'An approximate date is fine. We will fine-tune it with you.',
+    date: 'Start date',
+    time: 'Approximate time',
+    duration: 'For how many days?',
+  },
+  where: {
+    title: 'Where would you like to receive the vehicle?',
+    subtitle: 'No need for the exact address yet.',
+    airport: 'We hand it to you as you leave arrivals',
+    office: 'Pick it up at our office',
+    hotel: 'We bring it to where you are staying',
+    other: 'We will arrange it with your agent',
+  },
+  who: {
+    title: 'How many people will travel?',
+    subtitle: 'This helps us suggest the right size.',
+    hint12: 'Compact or sedan',
+    hint35: 'Sedan or SUV',
+    hint6: 'Van',
+    saving: 'Saving your answers…',
+    error: "We couldn't save your answers. Check your connection.",
+    fallback: 'Message us on WhatsApp anyway',
+  },
+  channel: {
+    eyebrow: 'Done! Almost there',
+    code: 'Your code',
+    codeHint: 'Mention it and your agent will see your answers.',
+    edit: 'Change answers',
+    prefix: 'Country code',
+    cancel: 'Cancel',
+    doneTitle: 'Request received!',
+    doneBack: 'Back to home',
+    whatsappAgain: 'Meanwhile, message us on WhatsApp',
+  },
+  message: {
+    intro: "Hi, I'd like to rent a vehicle.",
+    code: 'My code: {code}.',
+    date: 'Date: {date} {time}.',
+    duration: 'Duration: {duration}.',
+    location: 'Delivery: {location}.',
+    passengers: 'Passengers: {passengers}.',
+    category: "I'm interested in: {category}.",
+  },
+}
 
 export default { es, en }
