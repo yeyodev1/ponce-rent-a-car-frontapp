@@ -10,12 +10,6 @@ interface ImportMeta {
   readonly env: ImportMetaEnv
 }
 
-// Cajita de Pagos de Payphone (script de CDN cargado por el checkout).
-declare class PPaymentButtonBox {
-  constructor(config: Record<string, unknown>)
-  render(containerId: string): void
-}
-
 import 'vue-router'
 declare module 'vue-router' {
   interface RouteMeta {
