@@ -41,8 +41,10 @@ export const useUserStore = defineStore('user', {
       try {
         this.user = await authService.me()
         return this.user
-      } catch {
-        this.clear()
+      } catch (e) {
+        // Solo un 401 invalida la sesión: si el servidor está caído o reiniciando,
+        // el token se conserva y el admin no pierde su sesión.
+        if ((e as { status?: number }).status === 401) this.clear()
         return null
       } finally {
         this.loading = false
