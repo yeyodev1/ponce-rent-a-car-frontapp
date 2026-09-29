@@ -247,6 +247,8 @@ export interface LeadInput {
   comments?: string
   categorySlug?: string
   attribution?: Partial<Attribution>
+  /** Mismo id que el Pixel: el backend lo reenvía a Conversions API para deduplicar. */
+  eventId?: string
 }
 
 export interface LeadCreated {
