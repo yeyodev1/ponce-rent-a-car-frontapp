@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from '@/i18n'
 import { money } from '@/utils/format'
 import { useBodyScroll } from '@/composables/useBodyScroll'
@@ -11,18 +11,44 @@ import PriceBreakdown from './PriceBreakdown.vue'
  * desglose en una hoja inferior) y la acción del paso a la derecha.
  */
 const props = withDefaults(
-  defineProps<{ pricing: DisplayPricing; canContinue: boolean; label: string; busy?: boolean; showAction?: boolean }>(),
+  defineProps<{
+    pricing: DisplayPricing
+    canContinue: boolean
+    label: string
+    busy?: boolean
+    showAction?: boolean
+  }>(),
   { busy: false, showAction: true },
 )
 const emit = defineEmits<{ continue: [] }>()
 const { t } = useI18n()
 
 const open = ref(false)
+const closeBtn = ref<HTMLButtonElement | null>(null)
 useBodyScroll(open)
+
+// Es un diálogo modal: Escape lo cierra y el foco entra al abrirlo.
+function onKey(e: KeyboardEvent) {
+  if (e.key === 'Escape') open.value = false
+}
+watch(open, async (isOpen) => {
+  if (isOpen) {
+    window.addEventListener('keydown', onKey)
+    await nextTick()
+    closeBtn.value?.focus({ preventScroll: true })
+  } else {
+    window.removeEventListener('keydown', onKey)
+  }
+})
+onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
 const hasTotal = computed(() => props.pricing.total > 0 && props.pricing.state !== 'invalid')
 const daysLabel = computed(() =>
-  props.pricing.days === 1 ? t('booking.bar.oneDay') : props.pricing.days ? t('booking.bar.days', { n: props.pricing.days }) : '',
+  props.pricing.days === 1
+    ? t('booking.bar.oneDay')
+    : props.pricing.days
+      ? t('booking.bar.days', { n: props.pricing.days })
+      : '',
 )
 const caption = computed(() => {
   if (props.pricing.state === 'invalid') return t('booking.bar.unavailable')
@@ -47,8 +73,13 @@ const caption = computed(() => {
         <Transition v-else-if="hasTotal" name="price-bump">
           <span :key="pricing.total" class="bar__value">{{ money(pricing.total) }}</span>
         </Transition>
-        <span v-else class="bar__from">{{ t('booking.bar.from', { price: money(pricing.fromPerDay) }) }}</span>
-        <i v-if="pricing.state === 'loading' && hasTotal" class="bar__spin fa-solid fa-circle-notch fa-spin"></i>
+        <span v-else class="bar__from">{{
+          t('booking.bar.from', { price: money(pricing.fromPerDay) })
+        }}</span>
+        <i
+          v-if="pricing.state === 'loading' && hasTotal"
+          class="bar__spin fa-solid fa-circle-notch fa-spin"
+        ></i>
         <i v-else-if="hasTotal" class="bar__chev fa-solid fa-chevron-up"></i>
       </span>
     </button>
@@ -68,11 +99,22 @@ const caption = computed(() => {
     <Teleport to="body">
       <Transition name="sheet">
         <div v-if="open" class="sheet" @click.self="open = false">
-          <div class="sheet__panel" role="dialog" aria-modal="true" :aria-label="t('booking.bar.breakdown')">
+          <div
+            class="sheet__panel"
+            role="dialog"
+            aria-modal="true"
+            :aria-label="t('booking.bar.breakdown')"
+          >
             <span class="sheet__grip" aria-hidden="true"></span>
             <div class="sheet__head">
               <h2 class="sheet__title">{{ t('booking.bar.breakdown') }}</h2>
-              <button type="button" class="sheet__close" :aria-label="t('common.actions.close')" @click="open = false">
+              <button
+                ref="closeBtn"
+                type="button"
+                class="sheet__close"
+                :aria-label="t('common.actions.close')"
+                @click="open = false"
+              >
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
