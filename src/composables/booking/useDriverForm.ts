@@ -1,6 +1,7 @@
 import { computed, reactive, ref } from 'vue'
 import { t } from '@/i18n'
 import { booking } from './useBookingState'
+import { isE164 } from '@/utils/phone'
 
 /**
  * Validación en línea del conductor. Los errores aparecen al salir de cada
@@ -38,9 +39,7 @@ export const driverErrors = computed(() => {
     e.documentNumber = t('booking.driver.errors.cedula')
   else if (doc.length < 5) e.documentNumber = t('booking.driver.errors.docNumber')
   if (!EMAIL_RE.test(d.email.trim())) e.email = t('common.errors.email')
-  const digits = d.phone.replace(/\D/g, '')
-  if (digits.length < 7 || digits.length > 12 || !/^\+\d{1,4}$/.test(d.phonePrefix.trim()))
-    e.phone = t('common.errors.phone')
+  if (!isE164(d.phone)) e.phone = t('common.errors.phone')
   if (!d.country) e.country = t('common.errors.required')
   return e
 })
