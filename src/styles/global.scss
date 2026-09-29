@@ -293,6 +293,13 @@ label {
   }
 }
 
+// La barra inferior del panel admin (54px + borde) también debe quedar libre.
+@include until('lg') {
+  body:has(.admin) {
+    --toast-offset: 64px;
+  }
+}
+
 // ─── Utilidades ─────────────────────────────────────────────────────────
 .visually-hidden {
   position: absolute;
