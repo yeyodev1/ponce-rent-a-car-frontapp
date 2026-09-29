@@ -227,9 +227,18 @@ async function requestCallback(name: string, phone: string): Promise<string> {
   }
 }
 
-function setEntry(categorySlug: string, promo: string) {
+const DURATIONS: DurationBucket[] = ['1', '2-3', '4-7', '8-15', '16-30', '30+']
+const LOCATIONS: LocationCode[] = ['airport', 'office', 'hotel', 'other']
+
+/**
+ * Lo que la página de origen ya sabe (landing de aeropuerto, larga duración,
+ * una promo) llega por query y se precarga: no se vuelve a preguntar desde cero.
+ */
+function setEntry(categorySlug: string, promo: string, location = '', duration = '') {
   if (categorySlug) answers.categorySlug = categorySlug
   if (promo) answers.promo = promo
+  if ((LOCATIONS as string[]).includes(location)) answers.location = location as LocationCode
+  if ((DURATIONS as string[]).includes(duration)) answers.duration = duration as DurationBucket
 }
 
 function reset() {
