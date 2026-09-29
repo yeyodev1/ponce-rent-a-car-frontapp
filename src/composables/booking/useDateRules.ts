@@ -33,7 +33,8 @@ function toMinutes(hhmm: string): number {
 /** Primera hora ofrecible hoy (ahora + aviso mínimo, redondeada al próximo bloque). null = hoy ya no. */
 export function firstSlotToday(minHoursNotice: number): string | null {
   const now = new Date(Date.now() - 5 * 3600 * 1000)
-  const minutes = now.getUTCHours() * 60 + now.getUTCMinutes() + minHoursNotice * 60
+  // +1 min: a las 9:30:40 con 3 h de aviso, las 12:30 ya no cumplen.
+  const minutes = now.getUTCHours() * 60 + now.getUTCMinutes() + minHoursNotice * 60 + 1
   const rounded = Math.max(OPEN_HOUR * 60, Math.ceil(minutes / SLOT) * SLOT)
   return rounded > CLOSE_HOUR * 60 ? null : toHhmm(rounded)
 }
