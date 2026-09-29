@@ -4,15 +4,34 @@ import StatusBadge from '../StatusBadge.vue'
 import { languages, locations, reservationStatuses, verificationStatuses } from '@/config/admin'
 import { dateTime, es, vehicleLabel } from '@/composables/admin/helpers'
 import { refId, refObj, type AdminReservation } from '@/types/admin'
+import { useCatalogStore } from '@/stores/catalog'
 
 const props = defineProps<{ r: AdminReservation }>()
+
+const catalog = useCatalogStore()
+catalog.load()
+
+// La reserva guarda códigos: se muestran con el nombre del catálogo (o el código si ya no existe).
+const coverageName = (code: string) =>
+  es(catalog.coverages.find((c) => c.code === code)?.name) || code
+const extraName = (code: string) => es(catalog.extras.find((x) => x.code === code)?.name) || code
 
 const customer = computed(() => refObj(props.r.customer))
 const vehicle = computed(() => refObj(props.r.vehicle))
 
 const trip = computed(() => [
-  { icon: 'fa-solid fa-plane-arrival', label: 'Retiro', value: dateTime(props.r.pickupAt), sub: locations[props.r.pickupLocation] || props.r.pickupLocation },
-  { icon: 'fa-solid fa-plane-departure', label: 'Devolución', value: dateTime(props.r.returnAt), sub: locations[props.r.returnLocation] || props.r.returnLocation },
+  {
+    icon: 'fa-solid fa-plane-arrival',
+    label: 'Retiro',
+    value: dateTime(props.r.pickupAt),
+    sub: locations[props.r.pickupLocation] || props.r.pickupLocation,
+  },
+  {
+    icon: 'fa-solid fa-plane-departure',
+    label: 'Devolución',
+    value: dateTime(props.r.returnAt),
+    sub: locations[props.r.returnLocation] || props.r.returnLocation,
+  },
 ])
 
 const details = computed(() =>
@@ -20,12 +39,27 @@ const details = computed(() =>
     { label: 'Categoría', value: es(props.r.categoryName) || props.r.categorySlug },
     { label: 'Unidad', value: vehicle.value ? vehicleLabel(vehicle.value) : 'Sin asignar' },
     { label: 'Días', value: String(props.r.pricing?.days || '—') },
-    { label: 'Kilometraje', value: props.r.mileage === 'unlimited' ? 'Ilimitado' : `Limitado${props.r.pricing?.includedKm ? ` (${props.r.pricing.includedKm} km)` : ''}` },
-    { label: 'Cobertura', value: props.r.coverage },
-    { label: 'Extras', value: props.r.extras?.map((e) => `${e.code} ×${e.quantity}`).join(', ') },
+    {
+      label: 'Kilometraje',
+      value:
+        props.r.mileage === 'unlimited'
+          ? 'Ilimitado'
+          : `Limitado${props.r.pricing?.includedKm ? ` (${props.r.pricing.includedKm} km)` : ''}`,
+    },
+    { label: 'Cobertura', value: props.r.coverage && coverageName(props.r.coverage) },
+    {
+      label: 'Extras',
+      value: props.r.extras?.map((e) => `${extraName(e.code)} ×${e.quantity}`).join(', '),
+    },
     { label: 'Dirección de entrega', value: props.r.pickupAddress },
     { label: 'Idioma', value: languages[props.r.language] },
-    { label: 'Contrato', value: props.r.contract?.status && props.r.contract.status !== 'not_required' ? props.r.contract.status : '' },
+    {
+      label: 'Contrato',
+      value:
+        props.r.contract?.status && props.r.contract.status !== 'not_required'
+          ? props.r.contract.status
+          : '',
+    },
     { label: 'Creada', value: dateTime(props.r.createdAt) },
   ].filter((d) => d.value),
 )
@@ -59,9 +93,16 @@ const details = computed(() =>
       <span class="rinfo__avatar"><i class="fa-solid fa-id-card"></i></span>
       <div class="rinfo__cust-text">
         <strong>{{ customer?.name || 'Cliente' }}</strong>
-        <small>{{ [customer?.documentNumber, customer?.phone, customer?.email].filter(Boolean).join(' · ') }}</small>
+        <small>{{
+          [customer?.documentNumber, customer?.phone, customer?.email].filter(Boolean).join(' · ')
+        }}</small>
       </div>
-      <RouterLink v-if="refId(r.customer)" :to="`/admin/clientes/${refId(r.customer)}`" class="rinfo__go" aria-label="Ver cliente">
+      <RouterLink
+        v-if="refId(r.customer)"
+        :to="`/admin/clientes/${refId(r.customer)}`"
+        class="rinfo__go"
+        aria-label="Ver cliente"
+      >
         <i class="fa-solid fa-chevron-right"></i>
       </RouterLink>
     </div>
@@ -74,7 +115,8 @@ const details = computed(() =>
     </dl>
 
     <RouterLink v-if="refId(r.lead)" :to="`/admin/leads/${refId(r.lead)}`" class="rinfo__lead">
-      <i class="fa-solid fa-inbox"></i> Viene del lead {{ refObj(r.lead)?.code ? `#${refObj(r.lead)?.code}` : '' }}
+      <i class="fa-solid fa-inbox"></i> Viene del lead
+      {{ refObj(r.lead)?.code ? `#${refObj(r.lead)?.code}` : '' }}
     </RouterLink>
   </section>
 </template>
