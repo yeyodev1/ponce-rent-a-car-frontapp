@@ -13,8 +13,6 @@ const router = useRouter()
 const { t } = useI18n()
 const { phase, message, code, token, confirm, retryTarget } = usePaymentConfirm()
 
-useSeo(() => ({ title: t('booking.confirm.confirming'), noindex: true }))
-
 const q = (k: string) => (typeof route.query[k] === 'string' ? (route.query[k] as string) : '')
 onMounted(() => confirm(q('id'), q('clientTransactionId')))
 
@@ -35,6 +33,8 @@ const title = computed(() => {
   if (phase.value === 'confirming') return t('booking.confirm.confirming')
   return t('booking.confirm.error')
 })
+// La pestaña refleja el resultado, no se queda en "Confirmando…".
+useSeo(() => ({ title: title.value, noindex: true }))
 const body = computed(() => {
   if (phase.value === 'confirming') return t('booking.confirm.confirmingSub')
   if (phase.value === 'canceled') return t('booking.confirm.canceledSub')
