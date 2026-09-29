@@ -301,7 +301,7 @@ const en: typeof es = {
     oneDay: '1 day',
     updating: 'Updating price',
     deposit: 'To hold it',
-    guarantee: 'Deposit (at pickup, Datafast)',
+    guarantee: 'Security deposit (at pickup, Datafast)',
     noSurprises: 'This is your rental total. No hidden fees.',
     unavailable: 'Check your dates',
     offline: "We couldn't calculate the price",
