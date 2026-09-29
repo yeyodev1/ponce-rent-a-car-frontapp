@@ -20,11 +20,17 @@ $space-xl: clamp(3rem, 6vw, 5rem);
 $space-section: clamp(4.5rem, 9vw, 8rem);
 
 // Radios y curvas
-$radius-sm: 10px;
+$radius-sm: 12px;
 $radius-md: 18px;
-$radius-lg: 28px;
+$radius-lg: 26px;
 $radius-pill: 999px;
 $ease: cubic-bezier(0.22, 1, 0.36, 1);
+$ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+$ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+// Alturas táctiles
+$tap: 48px;
+$tap-lg: 58px;
 
 // Eyebrow: label chiquito en mayúsculas sobre cada título de sección
 @mixin eyebrow {
@@ -33,15 +39,15 @@ $ease: cubic-bezier(0.22, 1, 0.36, 1);
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: $accent-deep;
+  color: $blue;
 }
 
-@mixin display($size: $display-md, $weight: 500) {
+@mixin display($size: $display-md, $weight: 800) {
   font-family: $font-display;
   font-size: $size;
   font-weight: $weight;
-  font-optical-sizing: auto;
-  line-height: 1.06;
-  letter-spacing: -0.02em;
+  font-stretch: 112%;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
   text-wrap: balance;
 }
