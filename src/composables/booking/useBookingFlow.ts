@@ -14,7 +14,7 @@ import {
   needsAddress,
   quoteInput,
 } from './useBookingState'
-import { quote, quoteLoading, quoteOk } from './useQuote'
+import { quote, quoteLoading, quoteOk, refreshQuote } from './useQuote'
 import { driverValid, submitted } from './useDriverForm'
 import { useBookingSteps } from './useBookingSteps'
 
@@ -86,7 +86,7 @@ export function useBookingFlow() {
       return
     }
     const input = quoteInput.value
-    if (!input) return steps.go(2)
+    if (!input || (!quoteOk.value && !quoteLoading.value)) return steps.go(2)
     const signature = currentSignature()
     if (booking.reservation && booking.reservation.signature === signature) return steps.go(7)
 
@@ -132,6 +132,11 @@ export function useBookingFlow() {
         return
       }
       toast.error(err.message || t('common.errors.generic'))
+      // 400 = las fechas dejaron de ser válidas (p. ej. pasó la hora): se vuelve a elegirlas.
+      if (err.status === 400) {
+        refreshQuote()
+        steps.go(2)
+      }
     } finally {
       creating.value = false
     }
