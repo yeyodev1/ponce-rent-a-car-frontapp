@@ -33,7 +33,9 @@ function readLeadId(): string | null {
       if (!raw) continue
       if (/^[a-f0-9]{24}$/i.test(raw)) return raw
       const parsed = JSON.parse(raw)
-      if (parsed?.leadId) return String(parsed.leadId)
+      // La Ruta A guarda { answers, lead: { _id, code } }.
+      const id = parsed?.leadId || parsed?.lead?._id
+      if (id) return String(id)
     }
   } catch {
     /* sin lead */
