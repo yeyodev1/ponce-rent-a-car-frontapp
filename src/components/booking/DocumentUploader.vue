@@ -177,6 +177,8 @@ function onFile(e: Event) {
 
   &__btn {
     flex: 1 1 140px;
+    white-space: nowrap;
+    padding-inline: 1rem;
   }
 }
 
