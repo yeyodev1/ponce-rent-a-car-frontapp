@@ -90,6 +90,11 @@ const es = {
     es: 'Español',
     en: 'English',
   },
+  phone: {
+    country: 'País del número',
+    hint: 'Con código de país. Lo usamos para escribirte por WhatsApp.',
+    invalid: 'Número incompleto o inválido. Ejemplo: {example}',
+  },
   errors: {
     generic: 'Algo salió mal. Intenta de nuevo.',
     required: 'Este campo es obligatorio',
@@ -188,6 +193,11 @@ const en: typeof es = {
     label: 'Language',
     es: 'Español',
     en: 'English',
+  },
+  phone: {
+    country: 'Phone country',
+    hint: 'With country code. We use it to reach you on WhatsApp.',
+    invalid: 'Incomplete or invalid number. Example: {example}',
   },
   errors: {
     generic: 'Something went wrong. Please try again.',
