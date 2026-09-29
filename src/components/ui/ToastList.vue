@@ -32,7 +32,8 @@ const icons: Record<string, string> = {
 <style scoped lang="scss">
 .toasts {
   position: fixed;
-  bottom: 1.4rem;
+  // Encima de cualquier barra inferior (sitio o panel) en móvil.
+  bottom: calc(var(--toast-offset, var(--tabbar-h, 0px)) + 1.4rem);
   right: 1.4rem;
   @include flex(column, stretch, flex-start, 0.6rem);
   z-index: 300;
