@@ -98,6 +98,9 @@ const { h1, intro } = usePageSeo({
     @include flex-cards(290px, 1.25rem);
 
     @include from('lg') {
+      // Con pocas promos (lo normal) la fila queda centrada y no con un hueco a la derecha.
+      justify-content: center;
+
       > * {
         max-width: calc(33.333% - 0.84rem);
       }
