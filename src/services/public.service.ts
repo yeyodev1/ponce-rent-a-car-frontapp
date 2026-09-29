@@ -65,7 +65,8 @@ class PublicService extends APIBase {
     return (await this.post<LeadCreated>('public/leads', input)).data
   }
   async partner(input: PartnerInput) {
-    return (await this.post<{ _id: string; code: string }>('public/partners', input)).data
+    // Hasta 5 fotos comprimidas: más lento que un formulario normal.
+    return (await this.post<{ _id: string; code: string }>('public/partners', input, undefined, { timeout: 60000 })).data
   }
   async renaissance(input: { name: string; email: string; phone: string; language: 'es' | 'en' }) {
     return (await this.post<{ ok: true }>('public/renaissance', input)).data
