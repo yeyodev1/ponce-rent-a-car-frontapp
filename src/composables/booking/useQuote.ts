@@ -43,8 +43,15 @@ async function run(force = false) {
     quoteFailed.value = false
   } catch {
     if (mine !== seq) return
-    quoteFailed.value = true
     lastKey = ''
+    // Un tropiezo de red no debe dejar la barra sin precio: se reintenta una vez sola.
+    if (!force) {
+      timer = setTimeout(() => run(true), 1500)
+      return
+    }
+    quoteFailed.value = true
+    // Sin conexión con el API: se sigue intentando en silencio hasta que vuelva.
+    timer = setTimeout(() => run(true), 5000)
   } finally {
     if (mine === seq) quoteLoading.value = false
   }
