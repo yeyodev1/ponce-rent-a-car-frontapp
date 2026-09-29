@@ -1,7 +1,7 @@
-// Solo variables. Las fuentes se cargan con <link> en index.html: este archivo
-// se inyecta en cada SFC vía vite.config.ts, así que no debe emitir CSS.
+// Solo variables. Las fuentes se cargan con <link> en index.html.
+// Archivo (ancho variable) para titulares con aire automotriz; Manrope para leer.
 
-$font-display: 'Fraunces', Georgia, serif;
-$font-principal: 'Montserrat', system-ui, sans-serif;
+$font-display: 'Archivo', 'Arial Narrow', system-ui, sans-serif;
+$font-principal: 'Manrope', system-ui, sans-serif;
 $font-secondary: $font-principal;
 $font-body: $font-principal;
