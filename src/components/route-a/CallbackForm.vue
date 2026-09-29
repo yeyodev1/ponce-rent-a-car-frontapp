@@ -2,22 +2,21 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from '@/i18n'
 import { useRouteA } from '@/composables/useRouteA'
+import PhoneInput from '@/components/ui/PhoneInput.vue'
 
-/** "Te llamamos": solo nombre y teléfono, con el prefijo de Ecuador editable. */
+/** "Te llamamos": solo nombre y teléfono internacional (E.164, Ecuador por defecto). */
 const emit = defineEmits<{ cancel: [] }>()
 const { t } = useI18n()
 const { requestCallback } = useRouteA()
 
 const name = ref('')
-const prefix = ref('+593')
-const number = ref('')
+const phone = ref('')
 const sending = ref(false)
 const error = ref('')
 const touched = ref(false)
 const nameInput = ref<HTMLInputElement | null>(null)
 
-const digits = computed(() => number.value.replace(/\D/g, '').replace(/^0+/, ''))
-const phoneValid = computed(() => digits.value.length >= 7 && digits.value.length <= 12)
+const phoneValid = computed(() => phone.value !== '')
 const nameValid = computed(() => name.value.trim().length >= 2)
 
 onMounted(() => nameInput.value?.focus({ preventScroll: true }))
@@ -27,9 +26,7 @@ async function submit() {
   if (!nameValid.value || !phoneValid.value || sending.value) return
   sending.value = true
   error.value = ''
-  const code = prefix.value.replace(/[^\d+]/g, '') || '+593'
-  const full = `${code.startsWith('+') ? code : `+${code}`}${digits.value}`
-  error.value = await requestCallback(name.value.trim(), full)
+  error.value = await requestCallback(name.value.trim(), phone.value)
   sending.value = false
 }
 </script>
@@ -50,30 +47,13 @@ async function submit() {
       <p v-if="touched && !nameValid" class="cb__err">{{ t('common.errors.required') }}</p>
     </div>
 
-    <div class="cb__field">
-      <label for="cb-phone">{{ t('common.channel.callbackPhone') }}</label>
-      <div class="cb__phone">
-        <input
-          v-model="prefix"
-          class="cb__prefix"
-          type="tel"
-          inputmode="tel"
-          autocomplete="tel-country-code"
-          :aria-label="t('routeA.channel.prefix')"
-        />
-        <input
-          id="cb-phone"
-          v-model="number"
-          type="tel"
-          inputmode="tel"
-          autocomplete="tel-national"
-          enterkeyhint="send"
-          placeholder="99 123 4567"
-          :aria-invalid="touched && !phoneValid"
-        />
-      </div>
-      <p v-if="touched && !phoneValid" class="cb__err">{{ t('common.errors.phone') }}</p>
-    </div>
+    <PhoneInput
+      id="cb-phone"
+      v-model="phone"
+      :label="t('common.channel.callbackPhone')"
+      :invalid="touched && !phoneValid"
+      enterkeyhint="send"
+    />
 
     <p v-if="error" class="cb__err cb__err--box" role="alert">{{ error }}</p>
 
@@ -93,16 +73,6 @@ async function submit() {
   background: $surface;
   border: 1.5px solid $accent;
   box-shadow: 0 0 0 4px rgba($accent, 0.18);
-
-  &__phone {
-    @include flex(row, stretch, flex-start, 0.5rem);
-  }
-
-  &__prefix {
-    flex: 0 0 5.2rem;
-    text-align: center;
-    font-weight: 700;
-  }
 
   input[aria-invalid='true'] {
     border-color: $danger;
