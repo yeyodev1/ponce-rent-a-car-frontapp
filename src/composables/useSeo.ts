@@ -40,7 +40,8 @@ export function useSeo(input: () => SeoInput) {
   const { locale } = useI18n()
   watchEffect(() => {
     const seo = input()
-    const title = seo.title && seo.title !== site.name ? `${seo.title} | ${site.name}` : site.name
+    // Los títulos del API ya pueden traer la marca: no se repite.
+    const title = !seo.title ? site.name : seo.title.includes(site.shortName) ? seo.title : `${seo.title} | ${site.name}`
     document.title = title
     const desc = seo.description || ''
     setMeta('name', 'description', desc)
