@@ -86,7 +86,9 @@ function format(text: string, params?: Record<string, string | number>): string 
 }
 
 export function t(path: string, params?: Record<string, string | number>): string {
-  const text = lookup(messages[locale.value], path) ?? lookup(messages.es, path) ?? path
+  // Las claves de "common" se aceptan con o sin prefijo: t('actions.back') === t('common.actions.back').
+  const find = (l: Locale) => lookup(messages[l], path) ?? lookup(messages[l].common as Dict, path)
+  const text = find(locale.value) ?? find('es') ?? path
   return format(text, params)
 }
 
