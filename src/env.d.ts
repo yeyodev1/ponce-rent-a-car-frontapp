@@ -3,8 +3,30 @@
 interface ImportMetaEnv {
   readonly VITE_API_BASE_URL: string
   readonly VITE_META_PIXEL_ID: string
+  readonly VITE_GA4_ID: string
 }
 
 interface ImportMeta {
   readonly env: ImportMetaEnv
+}
+
+// Cajita de Pagos de Payphone (script de CDN cargado por el checkout).
+declare class PPaymentButtonBox {
+  constructor(config: Record<string, unknown>)
+  render(containerId: string): void
+}
+
+import 'vue-router'
+declare module 'vue-router' {
+  interface RouteMeta {
+    title?: string
+    seoKey?: string
+    landing?: string
+    focus?: boolean
+    noindex?: boolean
+    layout?: 'public' | 'admin' | 'bare'
+    requiresAuth?: boolean
+    requiresAdmin?: boolean
+    guestOnly?: boolean
+  }
 }
