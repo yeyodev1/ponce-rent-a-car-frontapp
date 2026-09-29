@@ -101,6 +101,12 @@ const es = {
     phone: 'Escribe un número válido',
     email: 'Escribe un correo válido',
   },
+  notFound: {
+    title: 'Página no encontrada',
+    heading: 'Esta página no existe',
+    text: 'Puede que el enlace esté mal escrito o que la página se haya movido.',
+    home: 'Volver al inicio',
+  },
 }
 
 const en: typeof es = {
@@ -204,6 +210,12 @@ const en: typeof es = {
     required: 'This field is required',
     phone: 'Enter a valid number',
     email: 'Enter a valid email',
+  },
+  notFound: {
+    title: 'Page not found',
+    heading: 'This page does not exist',
+    text: 'The link may be mistyped or the page may have moved.',
+    home: 'Back to home',
   },
 }
 
