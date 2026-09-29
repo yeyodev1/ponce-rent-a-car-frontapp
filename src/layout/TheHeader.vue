@@ -9,8 +9,10 @@ import { desktopKeys, linkByKey } from './navLinks'
 import { useMobileMenu } from '@/composables/useMobileMenu'
 
 /**
- * Header fijo. Sobre el hero del home arranca transparente y se vuelve sólido
- * (navy con blur) al hacer scroll. En los wizards (minimal) solo deja logo,
+ * Header fijo y superpuesto: no reserva espacio. Cada página arranca con un hero
+ * que ya suma --header-h a su padding (o el layout lo compensa en los wizards).
+ * Sobre el hero del home arranca transparente y se vuelve sólido (navy con blur)
+ * al hacer scroll. En los wizards (minimal) solo deja logo,
  * idioma y un botón para salir: nada compite con la decisión del paso.
  */
 const props = withDefaults(defineProps<{ minimal?: boolean }>(), { minimal: false })
@@ -39,7 +41,6 @@ watch(() => route.fullPath, () => menu.close())
 </script>
 
 <template>
-  <div v-if="!overHero" class="header-spacer" aria-hidden="true"></div>
   <header class="header" :class="{ 'header--solid': solid, 'header--minimal': minimal }">
     <div class="header__inner">
       <RouterLink to="/" class="header__brand" :aria-label="t('common.nav.home')">
@@ -80,11 +81,6 @@ watch(() => route.fullPath, () => menu.close())
 </template>
 
 <style scoped lang="scss">
-.header-spacer {
-  flex: 0 0 auto;
-  height: var(--header-h);
-}
-
 .header {
   position: fixed;
   inset: 0 0 auto;
