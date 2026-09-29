@@ -1,28 +1,33 @@
 /**
- * El copy es configuración: todos los textos y datos de la marca viven acá.
- * Los componentes solo consumen y pintan.
+ * Datos fijos de la marca. Los textos traducibles viven en src/i18n/messages;
+ * lo editable por el dueño (precios, horarios, dirección) llega del API.
  */
 export const site = {
-  name: 'Ponce's Rent a Car',
-  tagline: 'Tu nueva app, lista para crecer.',
-  description: 'Ponce's Rent a Car — hecho con Vue 3, TypeScript y SCSS.',
-  url: 'https://cliente.com',
-  email: 'hola@cliente.com',
-  // Solo dígitos con código de país, ej: 593984934039
-  whatsapp: '',
+  name: "Ponce's Rent a Car",
+  shortName: "Ponce's",
+  slogan: { es: 'Tu camino, tu elección', en: 'Your road, your choice' },
+  url: 'https://poncesrentacar.com',
+  email: '',
+  // Solo dígitos con código de país
+  whatsapp: '593998119853',
+  phone: '+593998119853',
+  phoneDisplay: '+593 99 811 9853',
+  city: 'Guayaquil',
   social: {
-    instagram: '',
-    facebook: '',
-    tiktok: '',
+    instagram: 'https://www.instagram.com/ponces.rent.car/',
+    facebook: 'https://www.facebook.com/profile.php?id=61582730782692',
+    tiktok: 'https://www.tiktok.com/@ponces_rentacar',
   },
-  nav: [
-    { label: 'Inicio', to: '/' },
-    { label: 'Nosotros', to: '/#nosotros' },
-    { label: 'Contacto', to: '/#contacto' },
-  ],
+  analytics: {
+    // IDs públicos por diseño (van al navegador). Vacíos = no se cargan.
+    ga4: import.meta.env.VITE_GA4_ID || '',
+    metaPixel: import.meta.env.VITE_META_PIXEL_ID || '',
+  },
 } as const
 
-export function whatsappLink(message = 'Hola, quiero más información'): string {
-  if (!site.whatsapp) return '#'
-  return `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(message)}`
+export function whatsappLink(message = ''): string {
+  const text = message ? `?text=${encodeURIComponent(message)}` : ''
+  return `https://wa.me/${site.whatsapp}${text}`
 }
+
+export const phoneLink = `tel:${site.phone}`
