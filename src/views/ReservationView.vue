@@ -150,7 +150,7 @@ const bookAgain = () => router.push({ path: '/reservar', query: { categoria: res
   width: 100%;
   max-width: 560px;
   margin-inline: auto;
-  padding: 1.5rem 1.25rem 3rem;
+  padding: 1.5rem 1.25rem calc(3rem + var(--tabbar-h));
 
   &__state,
   &__wrap,
