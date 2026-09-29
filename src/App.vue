@@ -54,5 +54,11 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
   }
+
+  // El header es fijo y no reserva espacio: los wizards no tienen hero que lo
+  // compense, así que el layout les deja el hueco.
+  &--focus &__main {
+    padding-top: var(--header-h);
+  }
 }
 </style>
