@@ -18,11 +18,16 @@
   --text-soft: #{$ink-soft};
   --accent: #{$accent};
   --border: #{$line};
+  // Alto de la barra inferior móvil: las vistas lo usan para no quedar tapadas.
+  --tabbar-h: 0px;
+  --header-h: 64px;
+  color-scheme: light;
 }
 
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 
   @include reduced-motion {
     scroll-behavior: auto;
@@ -34,11 +39,12 @@ body {
   color: var(--text);
   font-family: $font-principal;
   font-size: $text-base;
-  font-weight: 400;
-  line-height: 1.65;
+  font-weight: 450;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
 }
 
@@ -47,8 +53,10 @@ h2,
 h3,
 h4 {
   font-family: $font-display;
-  font-weight: 500;
-  line-height: 1.1;
+  font-weight: 800;
+  font-stretch: 110%;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
@@ -57,7 +65,8 @@ p {
 }
 
 img,
-video {
+video,
+svg {
   display: block;
   max-width: 100%;
 }
@@ -73,18 +82,21 @@ button {
   background: none;
   border: none;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 input,
 select,
 textarea {
   font: inherit;
-  font-size: 0.95rem;
+  // 16px evita el zoom automático de iOS al enfocar un campo.
+  font-size: 16px;
   color: $ink;
   background: $surface;
-  border: 1px solid $line;
+  border: 1.5px solid $line;
   border-radius: $radius-sm;
-  padding: 0.7rem 0.9rem;
+  padding: 0.8rem 0.95rem;
+  min-height: $tap;
   width: 100%;
   outline: none;
   transition:
@@ -92,69 +104,141 @@ textarea {
     box-shadow 0.25s ease;
 
   &:focus {
-    border-color: $accent;
-    box-shadow: 0 0 0 3px rgba($accent, 0.15);
+    border-color: $blue;
+    box-shadow: 0 0 0 4px rgba($blue, 0.14);
   }
+
+  &::placeholder {
+    color: $ink-muted;
+  }
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
 }
 
 label {
   font-size: 0.82rem;
-  font-weight: 500;
+  font-weight: 600;
   color: $ink-soft;
   display: block;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
 }
 
 :focus-visible {
-  outline: 2px solid $accent;
+  outline: 2px solid $blue;
   outline-offset: 2px;
 }
 
 ::selection {
-  background: $accent-soft;
-  color: $ink;
+  background: $accent;
+  color: $navy;
 }
 
+// ─── Botones ────────────────────────────────────────────────────────────
 .btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  min-height: $tap;
   font-family: $font-principal;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 0.85rem 1.8rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding: 0.8rem 1.5rem;
   border-radius: $radius-pill;
-  @include transition;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform 0.25s $ease,
+    box-shadow 0.25s $ease,
+    background-color 0.25s ease,
+    color 0.25s ease;
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  i {
+    font-size: 1.05em;
+  }
 
   &--primary {
     background: $accent;
-    color: $surface;
+    color: $on-accent;
+    box-shadow: $shadow-glow;
 
-    &:hover {
-      background: $accent-deep;
-      transform: translateY(-1px);
+    @media (hover: hover) {
+      &:hover {
+        background: $accent-deep;
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  &--blue {
+    background: $blue;
+    color: $surface;
+    box-shadow: $shadow-blue;
+
+    @media (hover: hover) {
+      &:hover {
+        background: $blue-deep;
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  &--whatsapp {
+    background: $whatsapp;
+    color: $surface;
+    box-shadow: 0 10px 28px rgba($whatsapp, 0.35);
+
+    @media (hover: hover) {
+      &:hover {
+        background: $whatsapp-deep;
+        transform: translateY(-2px);
+      }
     }
   }
 
   &--dark {
-    background: $ink;
+    background: $navy;
     color: $surface;
 
-    &:hover {
-      background: $accent-deep;
-      transform: translateY(-1px);
+    @media (hover: hover) {
+      &:hover {
+        background: $navy-2;
+        transform: translateY(-2px);
+      }
     }
   }
 
   &--ghost {
-    border: 1px solid $ink;
+    border: 1.5px solid $line-strong;
     color: $ink;
+    background: $surface;
 
-    &:hover {
-      background: $ink;
-      color: $surface;
+    @media (hover: hover) {
+      &:hover {
+        border-color: $ink;
+      }
+    }
+  }
+
+  &--ghost-light {
+    border: 1.5px solid rgba($on-dark, 0.3);
+    color: $on-dark;
+    background: rgba($on-dark, 0.06);
+    backdrop-filter: blur(8px);
+
+    @media (hover: hover) {
+      &:hover {
+        background: rgba($on-dark, 0.14);
+      }
     }
   }
 
@@ -163,12 +247,52 @@ label {
     color: $surface;
   }
 
-  &:disabled {
+  &--lg {
+    min-height: $tap-lg;
+    font-size: 1.02rem;
+    padding-inline: 1.8rem;
+  }
+
+  &--sm {
+    min-height: 38px;
+    font-size: 0.82rem;
+    padding: 0.5rem 1rem;
+  }
+
+  &--block {
+    width: 100%;
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
     opacity: 0.45;
     pointer-events: none;
+    box-shadow: none;
+  }
+
+  // Brillo que cruza el botón principal: invita al toque sin ser ruidoso.
+  &--shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(110deg, transparent 30%, rgba(#fff, 0.45) 50%, transparent 70%);
+    transform: translateX(-120%);
+    animation: btn-shine 3.6s $ease-in-out infinite 1.2s;
   }
 }
 
+@keyframes btn-shine {
+  0%,
+  60% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+// ─── Utilidades ─────────────────────────────────────────────────────────
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -180,7 +304,76 @@ label {
   white-space: nowrap;
 }
 
-// Transiciones globales de Vue — suaves, nada brusco
+.container {
+  @include container;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.3rem 0.7rem;
+  border-radius: $radius-pill;
+  background: $sand;
+  color: $ink-soft;
+
+  &--accent {
+    background: $accent-soft;
+    color: darken($accent-deep, 18%);
+  }
+
+  &--blue {
+    background: $blue-soft;
+    color: $blue-deep;
+  }
+
+  &--success {
+    background: $success-bg;
+    color: $success;
+  }
+
+  &--danger {
+    background: $danger-bg;
+    color: $danger;
+  }
+
+  &--warning {
+    background: $warning-bg;
+    color: darken($warning, 8%);
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, $sand 0%, lighten($sand, 3%) 40%, $sand 80%);
+  background-size: 200% 100%;
+  animation: skeleton 1.3s linear infinite;
+  border-radius: $radius-sm;
+}
+
+@keyframes skeleton {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+// ─── Revelado al hacer scroll (directiva v-reveal) ──────────────────────
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.7s $ease,
+    transform 0.7s $ease;
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-reveal='in'] {
+  opacity: 1;
+  transform: none;
+}
+
+// ─── Transiciones de Vue ────────────────────────────────────────────────
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -202,12 +395,76 @@ label {
   transform: translateY(14px);
 }
 
-.page-enter-active,
-.page-leave-active {
-  transition: opacity 0.25s ease;
+// Cambio de página: entra subiendo, sale desvaneciéndose rápido.
+.page-enter-active {
+  transition:
+    opacity 0.38s $ease,
+    transform 0.38s $ease;
 }
-.page-enter-from,
+.page-leave-active {
+  transition: opacity 0.16s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
 .page-leave-to {
+  opacity: 0;
+}
+
+// Pasos del wizard: la dirección depende de si se avanza o se vuelve.
+.step-next-enter-active,
+.step-next-leave-active,
+.step-prev-enter-active,
+.step-prev-leave-active {
+  transition:
+    opacity 0.32s $ease,
+    transform 0.42s $ease;
+}
+.step-next-enter-from {
+  opacity: 0;
+  transform: translateX(40px);
+}
+.step-next-leave-to {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+.step-prev-enter-from {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+.step-prev-leave-to {
+  opacity: 0;
+  transform: translateX(40px);
+}
+
+// Listas: aparecen escalonadas con --i como índice.
+.stagger-enter-active {
+  transition:
+    opacity 0.4s $ease,
+    transform 0.45s $ease;
+  transition-delay: calc(var(--i, 0) * 45ms);
+}
+.stagger-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+// Contador de precio: el número "salta" al cambiar.
+.price-bump-enter-active {
+  transition:
+    opacity 0.25s ease,
+    transform 0.35s $ease-spring;
+}
+.price-bump-leave-active {
+  transition: opacity 0.12s ease;
+  position: absolute;
+}
+.price-bump-enter-from {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.96);
+}
+.price-bump-leave-to {
   opacity: 0;
 }
 
@@ -218,5 +475,11 @@ label {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
   }
 }
