@@ -3,7 +3,8 @@ import { computed, watch } from 'vue'
 import { useI18n } from '@/i18n'
 import { booking } from '@/composables/booking/useBookingState'
 import { fieldError, touched } from '@/composables/booking/useDriverForm'
-import { countryOptions, DIAL_CODES } from '@/composables/booking/countries'
+import { countryOptions } from '@/composables/booking/countries'
+import PhoneInput from '@/components/ui/PhoneInput.vue'
 import { noUnits } from '@/composables/booking/useBookingFlow'
 
 /** Paso 6: datos del conductor. Validación al salir de cada campo, con el teclado correcto en móvil. */
@@ -14,12 +15,11 @@ const d = booking.driver
 const countries = computed(() => countryOptions(locale.value))
 const isCedula = computed(() => d.documentType === 'cedula')
 
-// Si el país cambia y el cliente aún no tocó el prefijo, se sugiere el del país.
+// Fuera de Ecuador lo normal es pasaporte. El teléfono no se toca: su país
+// se elige en el propio campo (formato internacional, Ecuador por defecto).
 watch(
   () => d.country,
   (c) => {
-    const dial = DIAL_CODES[c]
-    if (dial && (!d.phone || Object.values(DIAL_CODES).includes(d.phonePrefix))) d.phonePrefix = dial
     if (c !== 'EC' && d.documentType === 'cedula' && !d.documentNumber) d.documentType = 'passport'
   },
 )
@@ -81,14 +81,8 @@ const blur = (name: string) => (touched[name] = true)
     </div>
 
     <div class="field" :class="{ 'field--err': fieldError('phone') }">
-      <label for="drv-phone">{{ t('booking.driver.phone') }}</label>
-      <div class="field__phone">
-        <input v-model="d.phonePrefix" class="field__prefix" type="tel" inputmode="tel" autocomplete="tel-country-code"
-          maxlength="5" :aria-label="t('booking.driver.prefix')" @blur="blur('phone')" />
-        <input id="drv-phone" v-model="d.phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="099 123 4567"
-          :aria-invalid="!!fieldError('phone')" @blur="blur('phone')" />
-      </div>
-      <p v-if="fieldError('phone')" class="field__err">{{ fieldError('phone') }}</p>
+      <PhoneInput id="drv-phone" v-model="d.phone" :label="t('booking.driver.phone')" :invalid="!!fieldError('phone')"
+        @blur="blur('phone')" />
     </div>
 
     <div class="field" :class="{ 'field--err': fieldError('country') }">
@@ -171,15 +165,7 @@ const blur = (name: string) => (touched[name] = true)
     color: $ink-muted;
   }
 
-  &__phone {
-    @include flex(row, stretch, flex-start, 0.5rem);
-  }
 
-  &__prefix {
-    flex: 0 0 5.2rem;
-    text-align: center;
-    font-weight: 700;
-  }
 
   &__select {
     position: relative;
