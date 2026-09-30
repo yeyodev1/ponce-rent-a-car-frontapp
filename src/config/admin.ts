@@ -449,7 +449,7 @@ export const staffCopy = {
   role: 'Rol',
   roleHelp: {
     employee: 'Operación diaria: reservas, pagos, leads, flota y contenido.',
-    admin: 'Todo lo anterior, más eliminar, personal, tarifas, configuración, integraciones, exportar y reembolsar.',
+    admin: 'Todo lo del empleado, más eliminar, personal, tarifas, configuración, integraciones, exportar y reembolsar.',
   } as Record<string, string>,
   password: 'Contraseña',
   passwordNew: 'Nueva contraseña (opcional)',
@@ -493,6 +493,7 @@ export const walkInCopy = {
   returnTime: 'Hora de devolución',
   pickupLocation: 'Lugar de entrega',
   returnLocation: 'Lugar de devolución',
+  sameReturn: 'Se devuelve en el mismo lugar',
   options: 'Opciones',
   mileage: 'Kilometraje',
   limited: 'Limitado',
