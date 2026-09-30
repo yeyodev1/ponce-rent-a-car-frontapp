@@ -15,7 +15,7 @@ import {
   quoteInput,
 } from './useBookingState'
 import { quote, quoteLoading, quoteOk, refreshQuote } from './useQuote'
-import { driverValid, submitted } from './useDriverForm'
+import { cleanLicense, driverValid, submitted, touched } from './useDriverForm'
 import { useBookingSteps } from './useBookingSteps'
 
 /**
@@ -106,6 +106,9 @@ export function useBookingFlow() {
           email: d.email.trim().toLowerCase(),
           phone: driverPhone(),
           country: d.country,
+          licenseNumber: cleanLicense(d.licenseNumber),
+          licenseExpiresAt: d.licenseExpiresAt,
+          licenseCountry: d.licenseCountry || d.country,
         },
         language: locale.value,
         leadId: readLeadId(),
@@ -131,6 +134,12 @@ export function useBookingFlow() {
       const err = e as ApiError
       if (err.status === 409) {
         noUnits.value = true
+        return
+      }
+      // La licencia no cubre la devolución: se corrige en este mismo paso, no en las fechas.
+      if ((err.data as { errorCode?: string } | undefined)?.errorCode === 'license_expired') {
+        touched.licenseExpiresAt = true
+        toast.error(err.message)
         return
       }
       toast.error(err.message || t('common.errors.generic'))
