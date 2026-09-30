@@ -20,6 +20,7 @@ declare module 'vue-router' {
     noindex?: boolean
     layout?: 'public' | 'admin' | 'bare'
     requiresAuth?: boolean
+    requiresStaff?: boolean
     requiresAdmin?: boolean
     guestOnly?: boolean
   }
