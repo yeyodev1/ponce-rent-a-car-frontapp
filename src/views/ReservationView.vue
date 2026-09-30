@@ -10,6 +10,7 @@ import { useCatalogStore } from '@/stores/catalog'
 import AnimatedCheck from '@/components/booking/AnimatedCheck.vue'
 import HoldTimer from '@/components/booking/HoldTimer.vue'
 import ReservationFacts from '@/components/booking/ReservationFacts.vue'
+import ReservationContactForm from '@/components/booking/ReservationContactForm.vue'
 import { adoptReservation } from '@/composables/booking/useBookingState'
 import type { PublicReservation } from '@/types'
 
@@ -50,6 +51,8 @@ const title = computed(() =>
       : t('booking.reservation.titleClosed'),
 )
 const waLink = computed(() => whatsappLink(t('booking.reservation.whatsappMsg', { code: code.value })))
+// Con la reserva cerrada ya no hay nada que avisar: el formulario de contacto se oculta.
+const editable = computed(() => Boolean(res.value) && !['completed', 'cancelled', 'expired'].includes(res.value!.status))
 const contractReady = computed(() => res.value?.contract?.status === 'ready' && Boolean(res.value.contract.fileUrl))
 
 async function load() {
@@ -132,6 +135,8 @@ const bookAgain = () => router.push({ path: '/reservar', query: { categoria: res
       </div>
 
       <ReservationFacts :res="res" />
+
+      <ReservationContactForm v-if="editable" :res="res" :token="token" @updated="res = $event" />
 
       <div class="resv__actions">
         <RouterLink :to="{ path: `/reserva/${res.code}`, query: { t: token } }" class="btn btn--ghost btn--block">
