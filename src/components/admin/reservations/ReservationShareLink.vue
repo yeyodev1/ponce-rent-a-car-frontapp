@@ -80,6 +80,8 @@ async function copy() {
 
     .btn {
       flex: 1 1 150px;
+      // Si no caben en una fila, cada botón baja entero en vez de partir su texto.
+      white-space: nowrap;
     }
   }
 }
