@@ -439,7 +439,7 @@ export const roles: Record<string, StatusDef> = {
 
 export const staffCopy = {
   title: 'Personal',
-  subtitle: 'Quién entra al panel y qué puede hacer. Las cuentas no se eliminan: se desactivan.',
+  subtitle: 'Quién entra al panel y qué puede hacer. Desactiva una cuenta para pausarla o elimínala si la persona ya no trabaja aquí.',
   add: 'Nueva persona',
   edit: 'Editar persona',
   new: 'Nueva persona',
@@ -473,6 +473,12 @@ export const staffCopy = {
   activate: 'Reactivar',
   activated: 'Cuenta reactivada',
   deactivated: 'Cuenta desactivada',
+  remove: 'Eliminar',
+  selfDelete: 'No puedes eliminar tu propia cuenta.',
+  deleteTitle: (name: string) => `¿Eliminar a ${name}?`,
+  deleteMsg:
+    'La cuenta se borra y ya no podrá entrar al panel. El historial se conserva: las reservas y los pagos que registró siguen mostrando su nombre.',
+  deleted: 'Cuenta eliminada',
   empty: 'Aún no hay personal registrado',
   invalid: 'Completa nombre, correo válido y una contraseña de al menos 8 caracteres.',
 }
@@ -509,6 +515,11 @@ export const walkInCopy = {
   email: 'Correo',
   phone: 'Teléfono / WhatsApp',
   country: 'País',
+  licenseNumber: 'Número de licencia',
+  licenseExpiresAt: 'Licencia vence el',
+  licenseCountry: 'País de emisión',
+  licenseExpired: 'La licencia vence antes de la devolución.',
+  licenseInvalid: 'La licencia debe tener entre 4 y 20 letras o números.',
   notes: 'Notas internas',
   notesPlaceholder: 'Solo las ve el equipo.',
   quote: 'Cotización',
@@ -525,6 +536,44 @@ export const walkInCopy = {
   pastDate: 'El retiro no puede ser en el pasado.',
   returnBefore: 'La devolución debe ser después del retiro.',
   missing: 'Completa los campos marcados con *.',
+}
+
+// ─── Licencia de conducir ───────────────────────────────────────────────
+export const licenseCopy = {
+  title: 'Licencia de conducir',
+  number: 'Número',
+  expiresAt: 'Vence el',
+  country: 'País de emisión',
+  missing: 'Sin registrar',
+  expired: 'Vencida',
+  expiresBeforeReturn: 'Vence antes de la devolución',
+  valid: 'Vigente',
+  edit: 'Editar datos',
+  save: 'Guardar',
+  saving: 'Guardando…',
+  cancel: 'Cancelar',
+  saved: 'Datos del cliente actualizados',
+  name: 'Nombre completo',
+  email: 'Correo',
+  phone: 'Teléfono / WhatsApp',
+  notes: 'Notas internas',
+  clearHint: 'Deja número y fecha vacíos para borrar la licencia.',
+}
+
+// ─── Fotos (galerías del panel) ─────────────────────────────────────────
+export const galleryCopy = {
+  add: 'Agregar fotos',
+  addMore: 'Agregar más',
+  drop: 'Arrastra fotos aquí o elige varias a la vez',
+  hint: 'Se optimizan antes de subir (máx. 1600 px). La primera es la portada.',
+  cover: 'Portada',
+  left: 'Mover antes',
+  right: 'Mover después',
+  remove: 'Quitar foto',
+  progress: (n: number, total: number) => `Subiendo ${n} de ${total}…`,
+  notImage: (name: string) => `${name} no es una imagen`,
+  failed: (name: string, msg: string) => `${name}: ${msg}`,
+  done: (n: number) => (n === 1 ? '1 foto agregada' : `${n} fotos agregadas`),
 }
 
 export const shareCopy = {
