@@ -12,16 +12,31 @@ import CategorySpecs from './CategorySpecs.vue'
  * capacidad y precio. El modelo aparece solo como referencia ("o similar").
  */
 const props = withDefaults(
-  defineProps<{ category: Category; eager?: boolean; featured?: boolean }>(),
+  defineProps<{
+    category: Category
+    eager?: boolean
+    featured?: boolean
+    /** Unidades libres para las fechas del filtro; null = sin fechas elegidas. */
+    available?: number | null
+    bookQuery?: Record<string, string>
+  }>(),
   {
     eager: false,
     featured: false,
+    available: null,
+    bookQuery: undefined,
   },
 )
 
 const { t, tx } = useI18n()
 const name = computed(() => tx(props.category.name))
 const detail = computed(() => `/vehiculos/${props.category.slug}`)
+const withDates = computed(() => props.available !== null)
+const soldOut = computed(() => withDates.value && !props.available)
+const availableLabel = computed(() =>
+  props.available === 1 ? t('content.fleet.filter.availableOne') : t('content.fleet.filter.available', { n: props.available ?? 0 }),
+)
+const bookTo = computed(() => ({ path: '/reservar', query: props.bookQuery || { categoria: props.category.slug } }))
 
 function onBook() {
   track('category_select', { category: props.category.slug, from: 'fleet' })
@@ -38,7 +53,7 @@ function onBook() {
         ratio="16 / 10"
         sizes="(min-width: 1024px) 560px, 100vw"
       />
-      <span v-if="category.availableUnits === 0" class="ccard__flag chip">{{
+      <span v-if="!withDates && category.availableUnits === 0" class="ccard__flag chip">{{
         t('content.fleet.onRequest')
       }}</span>
     </RouterLink>
@@ -56,17 +71,18 @@ function onBook() {
       <p v-if="tx(category.tagline)" class="ccard__tagline">{{ tx(category.tagline) }}</p>
       <CategorySpecs :category="category" />
       <p v-if="category.exampleModels" class="ccard__models">{{ category.exampleModels }}</p>
+      <p v-if="withDates" class="ccard__avail" :class="{ 'ccard__avail--none': soldOut }" role="status">
+        <i :class="soldOut ? 'fa-solid fa-circle-xmark' : 'fa-solid fa-circle-check'" aria-hidden="true"></i>
+        {{ soldOut ? t('content.fleet.filter.none') : availableLabel }}
+      </p>
       <div class="ccard__actions">
-        <RouterLink
-          :to="{ path: '/reservar', query: { categoria: category.slug } }"
-          class="btn btn--primary"
-          @click="onBook"
-        >
+        <RouterLink v-if="!soldOut" :to="bookTo" class="btn btn--primary" @click="onBook">
           {{ t('content.fleet.book') }}
         </RouterLink>
         <RouterLink
           :to="{ path: '/ayudame-a-elegir', query: { categoria: category.slug } }"
-          class="btn btn--ghost"
+          class="btn"
+          :class="soldOut ? 'btn--whatsapp' : 'btn--ghost'"
         >
           {{ t('common.actions.helpMeChoose') }}
         </RouterLink>
@@ -189,6 +205,24 @@ function onBook() {
   &__models {
     font-size: $text-xs;
     color: $ink-muted;
+  }
+
+  &__avail {
+    position: relative;
+    z-index: 1;
+    align-self: flex-start;
+    @include flex(row, center, flex-start, 0.4rem);
+    padding: 0.3rem 0.75rem;
+    border-radius: $radius-pill;
+    background: $success-bg;
+    color: $success;
+    font-size: $text-sm;
+    font-weight: 700;
+
+    &--none {
+      background: $danger-bg;
+      color: $danger;
+    }
   }
 
   &__actions {
