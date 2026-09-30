@@ -83,6 +83,8 @@ function openFar() {
   @include flex(row, stretch, flex-start, 0.6rem);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
+  // Sin esto el snap alinea la primera opción al borde y se come el padding
+  scroll-padding-inline: 1.25rem;
   margin-inline: -1.25rem;
   padding: 0.35rem 1.25rem 0.6rem;
   scrollbar-width: none;
