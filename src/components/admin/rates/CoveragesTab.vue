@@ -9,10 +9,13 @@ import MoneyInput from '../MoneyInput.vue'
 import ToggleSwitch from '../ToggleSwitch.vue'
 import FormRow from '../FormRow.vue'
 import { useCrud } from '@/composables/admin/useCrud'
+import { useUserStore } from '@/stores/user'
 import { emptyI18n, es } from '@/composables/admin/helpers'
 import { money } from '@/utils/format'
 import type { Coverage, I18nText } from '@/types'
 
+// Tarifas: el empleado las consulta; solo un administrador las cambia.
+const userStore = useUserStore()
 const crud = reactive(
   useCrud<Coverage, Partial<Coverage>>('coverages', {
     empty: () => ({
@@ -33,6 +36,7 @@ const crud = reactive(
 <template>
   <CrudPanel
     :crud="crud"
+    :readonly="!userStore.isAdmin"
     noun="cobertura"
     feminine
     icon="fa-solid fa-shield-halved"
