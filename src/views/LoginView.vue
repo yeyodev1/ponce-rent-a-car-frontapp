@@ -23,7 +23,8 @@ async function submit() {
   loading.value = true
   try {
     const user = await userStore.login(email.value.trim(), password.value)
-    if (user.accountType !== 'admin') {
+    // Entra el personal (empleado o administrador); un cliente no tiene panel.
+    if (user.accountType !== 'admin' && user.accountType !== 'employee') {
       userStore.clear()
       error.value = t.notAdmin
       return
