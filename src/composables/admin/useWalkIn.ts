@@ -61,6 +61,8 @@ function blank() {
     returnTime: time,
     pickupLocation: 'office' as LocationCode,
     returnLocation: 'office' as LocationCode,
+    // Como en la Ruta B: casi siempre se devuelve donde se entregó.
+    sameReturn: true,
     mileage: 'limited' as MileageOption,
     coverage: '',
     extras: {} as Record<string, number>,
@@ -111,6 +113,13 @@ export function useWalkIn(onCreated?: () => void) {
     () => form.categorySlug,
     () => (form.vehicleId = ''),
   )
+  // Con "mismo lugar" la devolución sigue a la entrega; al desmarcarlo parte de ella.
+  watch(
+    () => [form.sameReturn, form.pickupLocation] as const,
+    ([same, pickup]) => {
+      if (same) form.returnLocation = pickup
+    },
+  )
   watch(
     () => catalog.coverages,
     (list) => {
@@ -143,7 +152,7 @@ export function useWalkIn(onCreated?: () => void) {
       pickupAt: pickupAt.value,
       returnAt: returnAt.value,
       pickupLocation: form.pickupLocation,
-      returnLocation: form.returnLocation,
+      returnLocation: form.sameReturn ? form.pickupLocation : form.returnLocation,
       mileage: form.mileage,
       coverage: form.coverage,
       extras: extras.value,
