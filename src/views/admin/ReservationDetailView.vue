@@ -1,14 +1,30 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import EmptyState from '@/components/admin/EmptyState.vue'
 import ReservationInfo from '@/components/admin/reservations/ReservationInfo.vue'
+import ReservationActions from '@/components/admin/reservations/ReservationActions.vue'
+import ReservationPayments from '@/components/admin/reservations/ReservationPayments.vue'
 import ReservationPricing from '@/components/admin/reservations/ReservationPricing.vue'
+import ReservationShareLink from '@/components/admin/reservations/ReservationShareLink.vue'
 import ReservationVerification from '@/components/admin/reservations/ReservationVerification.vue'
 import ReservationManage from '@/components/admin/reservations/ReservationManage.vue'
 import { useReservation } from '@/composables/admin/useReservation'
+import { readShareToken } from '@/composables/admin/useWalkIn'
 
 const route = useRoute()
-const { reservation, loading, saving, error, load, patch, openDocument } = useReservation(String(route.params.id))
+const id = String(route.params.id)
+const { reservation, loading, saving, error, load, patch, addPayment, refund, openDocument } = useReservation(id)
+
+// El token solo existe al crear la reserva presencial (el API no lo vuelve a mandar).
+const shareToken = computed(() => reservation.value?.accessToken || readShareToken(id))
+
+/** "Entregar" sin unidad: se lleva al selector de unidad. */
+function goAssign() {
+  const el = document.getElementById('assign-vehicle')
+  el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  el?.focus({ preventScroll: true })
+}
 </script>
 
 <template>
@@ -30,6 +46,7 @@ const { reservation, loading, saving, error, load, patch, openDocument } = useRe
 
     <div v-else class="rdetail__grid">
       <div class="rdetail__main">
+        <ReservationActions :r="reservation" :saving="saving" @patch="patch" @assign="goAssign" />
         <ReservationInfo :r="reservation" />
         <ReservationVerification
           :r="reservation"
@@ -39,6 +56,8 @@ const { reservation, loading, saving, error, load, patch, openDocument } = useRe
         />
       </div>
       <div class="rdetail__side">
+        <ReservationShareLink v-if="shareToken" :r="reservation" :token="shareToken" />
+        <ReservationPayments :r="reservation" :saving="saving" @pay="addPayment" @refund="refund" />
         <ReservationManage :r="reservation" :saving="saving" @patch="patch" />
         <ReservationPricing :r="reservation" />
       </div>
