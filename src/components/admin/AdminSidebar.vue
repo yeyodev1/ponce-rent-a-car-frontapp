@@ -4,13 +4,15 @@ import { useRouter } from 'vue-router'
 import AdminNavList from './AdminNavList.vue'
 import AdminWordmark from './AdminWordmark.vue'
 import { useUserStore } from '@/stores/user'
-import { brand, copy } from '@/config/admin'
+import { brand, copy, roles } from '@/config/admin'
 
 defineProps<{ collapsed: boolean }>()
 const emit = defineEmits<{ toggle: [] }>()
 
 const router = useRouter()
 const userStore = useUserStore()
+
+const role = computed(() => roles[userStore.user?.accountType || ''] || null)
 
 const initials = computed(() => {
   const n = userStore.user?.name || userStore.user?.email || '?'
@@ -40,10 +42,12 @@ function logout() {
 
     <div class="side__foot">
       <div class="side__user">
-        <span class="side__avatar">{{ initials }}</span>
+        <span class="side__avatar" :title="role?.label">{{ initials }}</span>
         <div v-if="!collapsed" class="side__who">
-          <strong>{{ userStore.user?.name || 'Administrador' }}</strong>
-          <small>{{ userStore.user?.email }}</small>
+          <strong>{{ userStore.user?.name || userStore.user?.email }}</strong>
+          <span v-if="role" class="side__role" :class="`side__role--${userStore.user?.accountType}`">
+            <i :class="role.icon"></i> {{ role.label }}
+          </span>
         </div>
         <button v-if="!collapsed" class="side__icon-btn" type="button" :title="copy.logout" @click="logout">
           <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -151,6 +155,22 @@ function logout() {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+  }
+
+  &__role {
+    @include flex(row, center, flex-start, 0.3rem);
+    margin-top: 0.2rem;
+    padding: 0.12rem 0.5rem;
+    border-radius: $radius-pill;
+    font-size: 0.66rem;
+    font-weight: 800;
+    background: rgba($on-dark, 0.1);
+    color: $on-dark-soft;
+
+    &--admin {
+      background: rgba($accent, 0.18);
+      color: $accent;
     }
   }
 
