@@ -2,7 +2,8 @@ import { ref } from 'vue'
 import { adminService } from '@/services/admin.service'
 import { useToastStore } from '@/stores/toast'
 import type { ApiError } from '@/types'
-import type { AdminReservation } from '@/types/admin'
+import { paymentCopy } from '@/config/admin'
+import type { AdminReservation, PaymentMethod } from '@/types/admin'
 
 /** Estado y acciones del detalle de una reserva en el panel. */
 export function useReservation(id: string) {
@@ -12,8 +13,9 @@ export function useReservation(id: string) {
   const saving = ref(false)
   const error = ref<ApiError | null>(null)
 
-  async function load() {
-    loading.value = true
+  /** silent: recarga sin volver al esqueleto (tras guardar algo). */
+  async function load(silent = false) {
+    if (!silent || !reservation.value) loading.value = true
     error.value = null
     try {
       reservation.value = await adminService.reservation(id)
@@ -43,12 +45,45 @@ export function useReservation(id: string) {
           documentFiles: reservation.value.documentFiles,
         }
       }
-      if (body.status || body.vehicleId) await load()
+      if (body.status || body.vehicleId) await load(true)
       toast.success(success)
       return true
     } catch (e) {
       toast.error((e as ApiError).message)
       return false
+    } finally {
+      saving.value = false
+    }
+  }
+
+  /**
+   * Pago manual (efectivo, transferencia o tarjeta en el local). El servidor
+   * recalcula pagado, saldo y estado de pago: se recarga el detalle completo.
+   */
+  async function addPayment(body: { amount: number; method: PaymentMethod; note?: string }) {
+    saving.value = true
+    try {
+      await adminService.addPayment(id, body)
+      await load(true)
+      toast.success(paymentCopy.registered)
+      return true
+    } catch (e) {
+      toast.error((e as ApiError).message)
+      return false
+    } finally {
+      saving.value = false
+    }
+  }
+
+  /** Reembolso (solo admin; el servidor responde 403 a un empleado). */
+  async function refund(paymentId: string) {
+    saving.value = true
+    try {
+      await adminService.refundPayment(paymentId)
+      await load(true)
+      toast.success(paymentCopy.refunded)
+    } catch (e) {
+      toast.error((e as ApiError).message)
     } finally {
       saving.value = false
     }
@@ -75,5 +110,5 @@ export function useReservation(id: string) {
 
   load()
 
-  return { reservation, loading, saving, error, load, patch, openDocument }
+  return { reservation, loading, saving, error, load, patch, addPayment, refund, openDocument }
 }
