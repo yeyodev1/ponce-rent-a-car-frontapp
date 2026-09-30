@@ -2,7 +2,7 @@
 import FormRow from '../FormRow.vue'
 import GalleryField from '../GalleryField.vue'
 import ToggleSwitch from '../ToggleSwitch.vue'
-import { vehicleStatuses } from '@/config/admin'
+import { fuelTypes, vehicleStatuses } from '@/config/admin'
 import { es } from '@/composables/admin/helpers'
 import type { Category } from '@/types'
 import type { VehicleForm } from '@/composables/admin/vehicleForm'
@@ -51,6 +51,26 @@ defineProps<{ categories: Category[] }>()
         </select>
       </div>
     </FormRow>
+    <FormRow basis="160px">
+      <div>
+        <label for="veh-fuel">Combustible</label>
+        <select id="veh-fuel" v-model="form.fuel">
+          <option v-for="(label, key) in fuelTypes" :key="key" :value="key">{{ label }}</option>
+        </select>
+      </div>
+      <div>
+        <label for="veh-seats">Asientos</label>
+        <input id="veh-seats" v-model.number="form.seats" type="number" min="1" max="60" inputmode="numeric" />
+      </div>
+      <div>
+        <label for="veh-km">Kilometraje (km)</label>
+        <input id="veh-km" v-model.number="form.mileageKm" type="number" min="0" step="1" inputmode="numeric" />
+      </div>
+    </FormRow>
+    <div>
+      <label for="veh-desc">Descripción</label>
+      <textarea id="veh-desc" v-model="form.description" rows="2" placeholder="Versión, equipamiento destacado…"></textarea>
+    </div>
     <FormRow>
       <div>
         <label for="veh-status">Estado</label>
