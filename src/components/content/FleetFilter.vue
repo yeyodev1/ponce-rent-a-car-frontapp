@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from '@/i18n'
 import { useCatalogStore } from '@/stores/catalog'
 
@@ -29,6 +29,22 @@ const chips = computed(() => [...catalog.categories].sort((a, b) => a.order - b.
 function pick(slug: string) {
   props.f.category = props.f.category === slug ? '' : slug
 }
+
+// En móvil los chips se deslizan: si se entra ya filtrado (?categoria=van)
+// el chip activo queda fuera de la vista y parece que se muestra "Todas".
+const strip = ref<HTMLElement | null>(null)
+watch(
+  () => [props.f.category, chips.value.length],
+  async () => {
+    await nextTick()
+    const el = strip.value
+    const on = el?.querySelector<HTMLElement>('.ffilter__chip--on')
+    if (!el || !on || el.scrollWidth <= el.clientWidth) return
+    const x = on.offsetLeft - el.offsetLeft
+    if (x < el.scrollLeft || x + on.offsetWidth > el.scrollLeft + el.clientWidth) el.scrollLeft = x - 18
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -64,7 +80,7 @@ function pick(slug: string) {
     </p>
     <p v-else class="ffilter__note">{{ t('content.fleet.filter.window', { n: f.maxDays }) }}</p>
 
-    <div class="ffilter__chips" role="group" :aria-label="t('content.fleet.filter.categories')">
+    <div ref="strip" class="ffilter__chips" role="group" :aria-label="t('content.fleet.filter.categories')">
       <button type="button" class="ffilter__chip" :class="{ 'ffilter__chip--on': !f.category }" :aria-pressed="!f.category" @click="f.category = ''">
         {{ t('content.fleet.filter.all') }}
       </button>
