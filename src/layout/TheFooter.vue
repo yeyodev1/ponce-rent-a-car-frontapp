@@ -75,6 +75,16 @@ const socials = [
 
     <div class="footer__bottom">
       <p>© {{ year }} {{ site.name }}. {{ t('common.footer.legal') }}</p>
+      <!-- La foto del inicio es CC BY-SA 4.0: la licencia exige citar autoría. -->
+      <p class="footer__photo">
+        {{ t('common.footer.photo') }}
+        <a
+          href="https://commons.wikimedia.org/wiki/File:Vista_cerro_santa_ana.jpg"
+          target="_blank"
+          rel="noopener"
+        >Paulakindsvater</a>
+        · <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>
+      </p>
       <p>
         {{ t('common.footer.madeBy') }}
         <a href="https://bakano.ec" target="_blank" rel="noopener" class="footer__bakano">Bakano</a>
@@ -230,6 +240,12 @@ const socials = [
       flex-direction: row;
       align-items: center;
     }
+  }
+
+  &__photo a {
+    color: $on-dark;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   &__bakano {
