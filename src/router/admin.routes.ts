@@ -7,7 +7,8 @@ const adminRoutes: RouteRecordRaw[] = [
   {
     path: '/admin',
     component: AdminLayout,
-    meta: { layout: 'admin', requiresAuth: true, requiresAdmin: true, noindex: true },
+    // requiresStaff: empleado o administrador. Las secciones de solo admin llevan requiresAdmin.
+    meta: { layout: 'admin', requiresAuth: true, requiresStaff: true, noindex: true },
     children: [
       {
         path: '',
@@ -103,7 +104,13 @@ const adminRoutes: RouteRecordRaw[] = [
         path: 'integraciones',
         name: 'AdminIntegrations',
         component: () => import('@/views/admin/IntegrationsView.vue'),
-        meta: { title: 'Integraciones' },
+        meta: { title: 'Integraciones', requiresAdmin: true },
+      },
+      {
+        path: 'personal',
+        name: 'AdminStaff',
+        component: () => import('@/views/admin/StaffView.vue'),
+        meta: { title: 'Personal', requiresAdmin: true },
       },
     ],
   },
