@@ -37,6 +37,7 @@ export function useStaff() {
   const saving = ref(false)
   const form = reactive(emptyForm())
   const toToggle = ref<StaffMember | null>(null)
+  const toDelete = ref<StaffMember | null>(null)
 
   async function load() {
     loading.value = true
@@ -120,7 +121,24 @@ export function useStaff() {
     }
   }
 
+  /** El backend también lo impide (409): aquí solo se evita ofrecer lo imposible. */
+  async function confirmDelete() {
+    const m = toDelete.value
+    toDelete.value = null
+    if (!m || isSelf(m)) return
+    const id = idOf(m)
+    try {
+      await adminService.deleteStaff(id)
+      items.value = items.value.filter((x) => idOf(x) !== id)
+      toast.success(t.deleted)
+    } catch (e) {
+      toast.error((e as ApiError).message)
+    }
+  }
+
   load()
 
-  return { items, loading, error, load, drawerOpen, editingId, saving, form, valid, openNew, openEdit, save, toToggle, confirmToggle, isSelf, idOf }
+  return {
+    toDelete,
+    confirmDelete, items, loading, error, load, drawerOpen, editingId, saving, form, valid, openNew, openEdit, save, toToggle, confirmToggle, isSelf, idOf }
 }
