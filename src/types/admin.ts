@@ -1,12 +1,16 @@
 import type {
   Attribution,
   Category,
+  DriverInput,
+  FuelType,
   DurationBucket,
   I18nText,
   LeadChannel,
   LeadSource,
   LeadStatus,
+  LocationCode,
   LocationOption,
+  MileageOption,
   PassengersBucket,
   PriceLine,
   ReservationStatus,
@@ -106,7 +110,18 @@ export interface CustomerDetail extends Customer {
 
 // ─── Reservas y pagos ───────────────────────────────────────────────────
 export type VehicleStatus = 'available' | 'prereserved' | 'reserved' | 'rented' | 'maintenance' | 'blocked'
-export type PaymentStatus = 'pending' | 'approved' | 'canceled' | 'error'
+export type PaymentStatus = 'pending' | 'approved' | 'canceled' | 'error' | 'refunded'
+export type PaymentMethod = 'cash' | 'transfer' | 'card'
+/** Lo calcula el servidor comparando lo pagado contra el total; nunca se edita a mano. */
+export type ReservationPaymentStatus = 'pending' | 'partial' | 'paid' | 'refunded'
+export type StaffRole = 'employee' | 'admin'
+
+/** Quién hizo algo en el panel (pago registrado, reserva presencial). */
+export interface StaffRef {
+  id: string
+  name: string
+  email: string
+}
 
 export interface Vehicle {
   _id: string
@@ -117,6 +132,11 @@ export interface Vehicle {
   plate: string
   color: string
   transmission: 'automatic' | 'manual'
+  fuel?: FuelType
+  seats?: number
+  /** Odómetro actual en km. */
+  mileageKm?: number
+  description?: string
   images: string[]
   status: VehicleStatus
   owner: string
@@ -129,7 +149,11 @@ export interface Payment {
   reservation: Ref<{ code: string }>
   reservationCode: string
   provider: 'payphone' | 'manual' | 'datafast'
-  mode: 'deposit' | 'full' | 'balance'
+  mode: 'deposit' | 'full' | 'balance' | 'manual'
+  method?: PaymentMethod
+  registeredBy?: StaffRef | null
+  note?: string
+  refundedAt?: string | null
   amount: number
   currency: 'USD'
   clientTransactionId: string
@@ -179,6 +203,13 @@ export interface AdminReservation {
   amountPaid: number
   balance: number
   paymentMode: 'deposit' | 'full' | ''
+  paymentStatus?: ReservationPaymentStatus
+  /** Estados a los que el servidor permite pasar desde el actual (ciclo estricto). */
+  allowedTransitions?: string[]
+  channel?: 'web' | 'walk_in'
+  createdBy?: StaffRef | null
+  /** Solo al crear una reserva presencial: para mandarle el enlace al cliente. */
+  accessToken?: string
   holdExpiresAt: string | null
   documents: { license: boolean; identity: boolean }
   contract?: { status: string; fileUrl: string }
@@ -224,6 +255,75 @@ export interface Dashboard {
   latestReservations: AdminReservation[]
   latestLeads: Lead[]
   fleet: Partial<Record<VehicleStatus, number>>
+  // v1.1
+  fleetSummary?: { available: number; total: number }
+  reservationCounts?: { pending: number; confirmed: number; inProgress: number }
+  revenueMonth?: number
+  today?: {
+    deliveries: number
+    returns: number
+    deliveriesList: TodayItem[]
+    returnsList: TodayItem[]
+  }
+}
+
+/** Retiro o devolución del día (Guayaquil). Campos opcionales: el API puede mandarlo resumido. */
+export interface TodayItem {
+  _id: string
+  code: string
+  status?: string
+  /** Hora del retiro (entregas) o de la devolución (devoluciones). */
+  at?: string
+  time?: string
+  location?: string
+  customerPhone?: string
+  pickupAt?: string
+  returnAt?: string
+  pickupLocation?: string
+  returnLocation?: string
+  customerName?: string
+  customer?: Ref<{ name: string; phone?: string }>
+  categoryName?: I18nText
+  categorySlug?: string
+  vehicle?: Ref<Pick<Vehicle, 'brand' | 'model' | 'plate'>>
+  vehicleLabel?: string
+}
+
+// ─── Personal ───────────────────────────────────────────────────────────
+export interface StaffMember {
+  id: string
+  _id?: string
+  name: string
+  email: string
+  phone: string
+  accountType: StaffRole
+  isActive: boolean
+  lastLoginAt: string | null
+  createdAt: string
+}
+
+export interface StaffInput {
+  name: string
+  email: string
+  phone: string
+  accountType: StaffRole
+  password?: string
+}
+
+// ─── Reserva presencial ─────────────────────────────────────────────────
+export interface WalkInInput {
+  categorySlug: string
+  vehicleId?: string
+  pickupAt: string
+  returnAt: string
+  pickupLocation: LocationCode
+  returnLocation: LocationCode
+  mileage: MileageOption
+  coverage: string
+  extras: { code: string; quantity: number }[]
+  driver: DriverInput
+  notes?: string
+  language?: 'es' | 'en'
 }
 
 // ─── Configuración ──────────────────────────────────────────────────────
