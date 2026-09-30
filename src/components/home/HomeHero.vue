@@ -12,9 +12,12 @@ const { t } = useI18n()
 const root = ref<HTMLElement | null>(null)
 useHeroIntro(root)
 
-// Ciudad al atardecer (Unsplash). Placeholder hasta tener fotos propias.
-const photo = 'https://images.unsplash.com/photo-1496568816309-51d7c20e3b21?auto=format&fit=crop&q=70'
-const srcset = [800, 1200, 1600, 2200].map((w) => `${photo}&w=${w} ${w}w`).join(', ')
+// Cerro Santa Ana, Las Peñas y el faro desde el Malecón 2000: Guayaquil a la
+// primera mirada. Servida desde /public en WebP; en móvil va un recorte
+// vertical centrado en el cerro. Crédito (CC BY-SA 4.0) en el footer.
+const base = '/images/hero/guayaquil-cerro-santa-ana'
+const landscape = [1280, 1920, 2560].map((w) => `${base}-${w}.webp ${w}w`).join(', ')
+const portrait = [720, 1080].map((w) => `${base}-portrait-${w}.webp ${w}w`).join(', ')
 
 const words = computed(() => t('home.hero.title').split(' '))
 const chips = computed(() => [
@@ -27,7 +30,11 @@ const chips = computed(() => [
 <template>
   <section ref="root" class="hero">
     <div class="hero__bg" aria-hidden="true">
-      <img :src="`${photo}&w=1200`" :srcset="srcset" sizes="100vw" alt="" fetchpriority="high" decoding="async" />
+      <picture>
+        <source media="(max-width: 767px)" type="image/webp" :srcset="portrait" sizes="100vw" />
+        <source type="image/webp" :srcset="landscape" sizes="100vw" />
+        <img :src="`${base}-1920.webp`" alt="" width="1920" height="1280" fetchpriority="high" decoding="async" />
+      </picture>
     </div>
     <div class="hero__veil" aria-hidden="true"></div>
 
@@ -89,12 +96,25 @@ const chips = computed(() => [
     z-index: -2;
     will-change: transform;
 
+    picture {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
     img {
       width: 100%;
       height: 115%;
       margin-top: -7%;
       object-fit: cover;
-      object-position: 50% 70%;
+      // Móvil: el faro y el cerro quedan entre el título y las tarjetas.
+      object-position: 50% 42%;
+
+      @include from('lg') {
+        // Desktop: el texto va a la izquierda; se sube el encuadre para que el
+        // faro y las casas de colores respiren a la derecha del título.
+        object-position: 50% 38%;
+      }
     }
   }
 
