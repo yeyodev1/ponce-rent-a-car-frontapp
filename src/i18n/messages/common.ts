@@ -84,6 +84,7 @@ const es = {
     contact: 'Contacto',
     legal: 'Todos los derechos reservados.',
     madeBy: 'Hecho por',
+    photo: 'Foto de portada: Cerro Santa Ana, Guayaquil —',
   },
   lang: {
     label: 'Idioma',
@@ -194,6 +195,7 @@ const en: typeof es = {
     contact: 'Contact',
     legal: 'All rights reserved.',
     madeBy: 'Made by',
+    photo: 'Cover photo: Cerro Santa Ana, Guayaquil —',
   },
   lang: {
     label: 'Language',
