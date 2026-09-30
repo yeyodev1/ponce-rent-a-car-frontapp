@@ -7,12 +7,14 @@ import StatusBadge from '@/components/admin/StatusBadge.vue'
 import ToggleSwitch from '@/components/admin/ToggleSwitch.vue'
 import StaffForm from '@/components/admin/staff/StaffForm.vue'
 import { useStaff } from '@/composables/admin/useStaff'
+import { useUserStore } from '@/stores/user'
 import { copy, roles, staffCopy as t } from '@/config/admin'
 import { timeAgo } from '@/composables/admin/helpers'
 import type { Column, StaffMember } from '@/types/admin'
 
 const s = useStaff()
-const { items, loading, error, drawerOpen, editingId, saving, form, toToggle } = s
+const { items, loading, error, drawerOpen, editingId, saving, form, toToggle, toDelete } = s
+const user = useUserStore()
 
 const columns: Column[] = [
   { key: 'name', label: 'Persona' },
@@ -66,6 +68,17 @@ const editingSelf = () => items.value.some((m) => s.idOf(m) === editingId.value 
         </template>
         <template #actions="{ row }">
           <button class="staff__icon" type="button" :aria-label="copy.edit" @click="s.openEdit(row)"><i class="fa-solid fa-pen"></i></button>
+          <button
+            v-if="user.isAdmin"
+            class="staff__icon staff__icon--danger"
+            type="button"
+            :aria-label="`${t.remove} ${row.name}`"
+            :title="s.isSelf(row) ? t.selfDelete : t.remove"
+            :disabled="s.isSelf(row)"
+            @click.stop="toDelete = row"
+          >
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
         </template>
       </AdminTable>
     </section>
@@ -88,6 +101,15 @@ const editingSelf = () => items.value.some((m) => s.idOf(m) === editingId.value 
       :danger="Boolean(toToggle?.isActive)"
       @confirm="s.confirmToggle"
       @cancel="toToggle = null"
+    />
+
+    <ConfirmDialog
+      :open="Boolean(toDelete)"
+      :title="t.deleteTitle(toDelete?.name || toDelete?.email || '')"
+      :message="t.deleteMsg"
+      :confirm-label="t.remove"
+      @confirm="s.confirmDelete"
+      @cancel="toDelete = null"
     />
   </div>
 </template>
@@ -149,9 +171,19 @@ const editingSelf = () => items.value.some((m) => s.idOf(m) === editingId.value 
     border-radius: 10px;
     color: $ink-muted;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: $sand;
       color: $ink;
+    }
+
+    &--danger:hover:not(:disabled) {
+      background: $danger-bg;
+      color: $danger;
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
     }
   }
 }
