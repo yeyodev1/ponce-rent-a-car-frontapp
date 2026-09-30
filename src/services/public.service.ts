@@ -90,6 +90,10 @@ class PublicService extends APIBase {
   async reservation(code: string, token: string) {
     return (await this.get<PublicReservation>(`public/reservations/${code}?t=${token}`)).data
   }
+  /** El cliente corrige su correo o teléfono (E.164) desde el enlace seguro. */
+  async updateContact(code: string, token: string, input: { email?: string; phone?: string }) {
+    return (await this.patch<PublicReservation>(`public/reservations/${code}/contact?t=${token}`, input)).data
+  }
   async uploadDocument(code: string, token: string, kind: 'license' | 'identity', dataUrl: string) {
     return (
       await this.post<{ documents: { license: boolean; identity: boolean }; status: string }>(
