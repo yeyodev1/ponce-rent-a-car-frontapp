@@ -131,9 +131,9 @@ const es = {
     notFoundText:
       'Puede que ya no esté en la flota. Mira las demás categorías o pide ayuda a un asesor.',
     seeAll: 'Ver todas las categorías',
-    seoTitle: 'Renta de {name} en Guayaquil',
+    seoTitle: 'Renta de autos categoría {name} en Guayaquil',
     seoDescription:
-      'Alquila un {name} en Guayaquil desde {price} por día. Kilometraje incluido y entrega en aeropuerto.',
+      'Renta un vehículo de la categoría {name} en Guayaquil desde {price} por día. Kilometraje incluido y entrega en aeropuerto.',
     seo: {
       title: 'Categoría de vehículo',
       description: 'Renta de vehículos en Guayaquil con entrega en aeropuerto.',
@@ -792,7 +792,7 @@ const en: typeof es = {
     seeAll: 'See all categories',
     seoTitle: '{name} rental in Guayaquil',
     seoDescription:
-      'Rent a {name} in Guayaquil from {price} per day. Mileage included and airport delivery.',
+      'Rent a vehicle from our {name} category in Guayaquil from {price} per day. Mileage included and airport delivery.',
     seo: {
       title: 'Vehicle category',
       description: 'Car rental in Guayaquil with airport delivery.',
