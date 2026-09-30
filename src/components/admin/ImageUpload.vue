@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { adminService } from '@/services/admin.service'
+import { uploadPublicImage } from '@/composables/admin/useImageUpload'
 import { useToastStore } from '@/stores/toast'
 import type { ApiError } from '@/types'
 
@@ -11,7 +11,7 @@ const toast = useToastStore()
 const input = ref<HTMLInputElement | null>(null)
 const uploading = ref(false)
 const dragging = ref(false)
-// Si el servidor no tiene Cloudinary configurado (503) se ofrece pegar una URL.
+// Sin Cloudinary el API guarda la imagen él mismo; pegar una URL queda como atajo manual.
 const pasteMode = ref(false)
 const pasted = ref('')
 
@@ -23,8 +23,7 @@ async function upload(file?: File | null) {
   }
   uploading.value = true
   try {
-    const { url } = await adminService.upload(file)
-    emit('update:modelValue', url)
+    emit('update:modelValue', await uploadPublicImage(file))
   } catch (e) {
     const err = e as ApiError
     if (err.status === 503 || err.status === 404) {
