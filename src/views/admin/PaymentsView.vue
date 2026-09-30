@@ -8,23 +8,27 @@ import FilterPills from '@/components/admin/FilterPills.vue'
 import Pagination from '@/components/admin/Pagination.vue'
 import { useAdminList } from '@/composables/admin/useAdminList'
 import { adminService } from '@/services/admin.service'
-import { paymentModes, paymentProviders, paymentStatuses } from '@/config/admin'
+import { paymentCopy, paymentMethods, paymentProviders, paymentStatuses } from '@/config/admin'
 import { money } from '@/utils/format'
 import { dateTime } from '@/composables/admin/helpers'
 import { refId, type Column, type Payment } from '@/types/admin'
 
 const router = useRouter()
-const list = useAdminList<Payment>((p) => adminService.list<Payment>('payments', p))
+const list = useAdminList<Payment>((p) => adminService.list<Payment>('payments', p), { filters: ['method'] })
 
 const columns: Column[] = [
   { key: 'reservationCode', label: 'Reserva' },
   { key: 'amount', label: 'Monto', align: 'right' },
-  { key: 'mode', label: 'Tipo' },
-  { key: 'provider', label: 'Medio' },
-  { key: 'transactionId', label: 'Transacción', mobileHidden: true },
+  { key: 'method', label: 'Método' },
+  { key: 'registeredBy', label: paymentCopy.registeredBy, mobileHidden: true },
   { key: 'createdAt', label: 'Fecha' },
   { key: 'status', label: 'Estado' },
 ]
+
+// Los pagos en línea de Payphone no traen "method" en registros antiguos: son tarjeta.
+const methodOf = (p: Payment) =>
+  paymentMethods[p.method || ''] || (p.provider === 'payphone' ? paymentMethods.card : paymentProviders[p.provider] || p.provider)
+const byOf = (p: Payment) => p.registeredBy?.name || (p.provider === 'payphone' ? `${paymentCopy.online} (Payphone)` : '—')
 
 function open(p: Payment) {
   const id = refId(p.reservation)
@@ -34,11 +38,18 @@ function open(p: Payment) {
 
 <template>
   <div>
-    <PageHeader title="Pagos" subtitle="Cobros de separación y pagos totales hechos con Payphone o registrados a mano." />
+    <PageHeader title="Pagos" subtitle="Pagos en línea (Payphone) y los registrados en el local: efectivo, transferencia o tarjeta." />
     <div class="pay__filters">
       <SearchBar v-model="list.filters.q" placeholder="Buscar por reserva o transacción" />
     </div>
     <FilterPills v-model="list.filters.status" :options="paymentStatuses" class="pay__pills" />
+    <FilterPills
+      :model-value="list.filters.method || ''"
+      :options="paymentMethods"
+      all-label="Todos los métodos"
+      class="pay__pills pay__pills--last"
+      @update:model-value="(v) => (list.filters.method = v)"
+    />
 
     <section class="pay__card">
       <AdminTable
@@ -54,9 +65,8 @@ function open(p: Payment) {
       >
         <template #cell-reservationCode="{ row }"><strong class="pay__code">{{ row.reservationCode }}</strong></template>
         <template #cell-amount="{ row }"><strong class="pay__amount">{{ money(row.amount, true) }}</strong></template>
-        <template #cell-mode="{ row }">{{ paymentModes[row.mode] || row.mode }}</template>
-        <template #cell-provider="{ row }">{{ paymentProviders[row.provider] || row.provider }}</template>
-        <template #cell-transactionId="{ row }"><code class="pay__tx">{{ row.transactionId || row.clientTransactionId || '—' }}</code></template>
+        <template #cell-method="{ row }">{{ methodOf(row) }}</template>
+        <template #cell-registeredBy="{ row }"><span class="pay__by">{{ byOf(row) }}</span></template>
         <template #cell-createdAt="{ row }">{{ dateTime(row.approvedAt || row.createdAt) }}</template>
         <template #cell-status="{ row }"><StatusBadge :status="row.status" :map="paymentStatuses" /></template>
       </AdminTable>
@@ -76,7 +86,11 @@ function open(p: Payment) {
   }
 
   &__pills {
-    margin-bottom: 1rem;
+    margin-bottom: 0.7rem;
+
+    &--last {
+      margin-bottom: 1rem;
+    }
   }
 
   &__card {
@@ -97,9 +111,9 @@ function open(p: Payment) {
     color: $ink;
   }
 
-  &__tx {
-    font-size: 0.75rem;
-    color: $ink-muted;
+  &__by {
+    font-size: 0.82rem;
+    color: $ink-soft;
   }
 }
 </style>
