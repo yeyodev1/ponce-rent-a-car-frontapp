@@ -329,6 +329,9 @@ export interface DriverInput {
   phone: string
   country: string
   birthDate?: string
+  licenseNumber?: string
+  licenseExpiresAt?: string
+  licenseCountry?: string
 }
 
 export type ReservationStatus =
@@ -377,7 +380,7 @@ export interface PublicReservation {
   amountPaid: number
   balance: number
   guaranteeAmount: number
-  driver: { name: string; email: string }
+  driver: { name: string; email: string; phone?: string }
   documents: { license: boolean; identity: boolean }
   holdExpiresAt: string | null
   contract: { status: string; fileUrl: string }
