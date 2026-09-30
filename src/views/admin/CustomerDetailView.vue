@@ -6,8 +6,12 @@ import AdminCard from '@/components/admin/AdminCard.vue'
 import EmptyState from '@/components/admin/EmptyState.vue'
 import StatusBadge from '@/components/admin/StatusBadge.vue'
 import LatestList from '@/components/admin/dashboard/LatestList.vue'
+import AdminDrawer from '@/components/admin/AdminDrawer.vue'
+import LicenseFacts from '@/components/admin/customers/LicenseFacts.vue'
+import CustomerEditForm from '@/components/admin/customers/CustomerEditForm.vue'
+import { useCustomerEdit } from '@/composables/admin/useCustomerEdit'
 import { adminService } from '@/services/admin.service'
-import { languages, leadSources, leadStatuses, reservationStatuses, verificationStatuses } from '@/config/admin'
+import { copy, languages, licenseCopy, leadSources, leadStatuses, reservationStatuses, verificationStatuses } from '@/config/admin'
 import { es, shortDate, telLink, timeAgo, waLink } from '@/composables/admin/helpers'
 import { money } from '@/utils/format'
 import type { ApiError } from '@/types'
@@ -30,6 +34,7 @@ async function load() {
   }
 }
 onMounted(load)
+const edit = useCustomerEdit(c)
 
 const facts = computed(() =>
   c.value
@@ -76,6 +81,7 @@ const leads = computed(() =>
           <i class="fa-brands fa-whatsapp"></i> WhatsApp
         </a>
         <a v-if="c.phone" :href="telLink(c.phone)" class="btn btn--ghost btn--sm"><i class="fa-solid fa-phone"></i> Llamar</a>
+        <button class="btn btn--dark btn--sm" type="button" @click="edit.start"><i class="fa-solid fa-pen"></i> {{ licenseCopy.edit }}</button>
       </template>
     </PageHeader>
 
@@ -96,6 +102,9 @@ const leads = computed(() =>
         </dl>
         <p v-if="c.notes" class="cdetail__notes">{{ c.notes }}</p>
       </AdminCard>
+      <AdminCard :title="licenseCopy.title" icon="fa-regular fa-id-card">
+        <LicenseFacts :number="c.licenseNumber" :expires-at="c.licenseExpiresAt" :country="c.licenseCountry" />
+      </AdminCard>
       <AdminCard title="Reservas" icon="fa-solid fa-calendar-check" flush>
         <LatestList :rows="reservations" :map="reservationStatuses" empty="Sin reservas." />
       </AdminCard>
@@ -103,6 +112,16 @@ const leads = computed(() =>
         <LatestList :rows="leads" :map="leadStatuses" empty="Sin leads asociados." />
       </AdminCard>
     </div>
+
+    <AdminDrawer :open="edit.open.value" :title="licenseCopy.edit" :subtitle="c?.name" @close="edit.open.value = false">
+      <CustomerEditForm :form="edit.form" :errors="edit.errors.value" />
+      <template #footer>
+        <button class="btn btn--ghost btn--sm" type="button" @click="edit.open.value = false">{{ copy.cancel }}</button>
+        <button class="btn btn--primary btn--sm" type="button" :disabled="edit.saving.value || !edit.valid.value" @click="edit.save">
+          <i v-if="edit.saving.value" class="fa-solid fa-spinner fa-spin"></i> {{ edit.saving.value ? copy.saving : copy.save }}
+        </button>
+      </template>
+    </AdminDrawer>
   </div>
 </template>
 
