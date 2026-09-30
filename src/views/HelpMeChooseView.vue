@@ -18,7 +18,7 @@ import StepChannel from '@/components/route-a/StepChannel.vue'
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const { whenDone, maxStep, setEntry } = useRouteA()
+const { whenDone, maxStep, lead, setEntry, reset } = useRouteA()
 
 const step = computed(() => Math.min(ROUTE_A_TOTAL, Math.max(1, Number(route.query.paso) || 1)))
 const direction = ref<'next' | 'prev'>('next')
@@ -64,6 +64,9 @@ const screens = computed(() => {
 
 onMounted(() => {
   const q = route.query
+  // Entrar de nuevo desde un enlace (sin ?paso) tras pedir la llamada es una
+  // consulta nueva: no se reabre la pantalla de "solicitud recibida".
+  if (!q.paso && lead.callbackDone) reset()
   // "30 " llega así cuando el + de ?duracion=30+ no se codificó en el enlace.
   const duration = String(q.duracion || '').replace(/ $/, '+')
   setEntry(String(q.categoria || ''), String(q.promo || ''), String(q.lugar || ''), duration)
