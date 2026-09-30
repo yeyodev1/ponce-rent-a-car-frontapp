@@ -127,4 +127,16 @@ const isActive = (to: string) => (to === '/admin' ? route.path === '/admin' : ro
     }
   }
 }
+
+// Laptops de 800 px de alto: sin esto "Sistema" (Personal, Integraciones)
+// queda escondido bajo el pie del menú y parece que no existe.
+@media (max-height: 860px) {
+  .nav {
+    gap: 0.5rem;
+  }
+
+  .nav__item {
+    padding-block: 0.3rem;
+  }
+}
 </style>
