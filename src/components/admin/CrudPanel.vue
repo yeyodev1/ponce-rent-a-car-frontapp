@@ -5,6 +5,7 @@ import ConfirmDialog from './ConfirmDialog.vue'
 import EmptyState from './EmptyState.vue'
 import ToggleSwitch from './ToggleSwitch.vue'
 import { copy } from '@/config/admin'
+import { useUserStore } from '@/stores/user'
 import type { ApiError } from '@/types'
 
 /**
@@ -41,6 +42,8 @@ const props = withDefaults(
     filter?: (item: T) => boolean
     wide?: boolean
     icon?: string
+    /** Solo lectura (p. ej. tarifas para un empleado): sin crear, activar ni guardar. */
+    readonly?: boolean
   }>(),
   { toggleLabel: 'Activo' },
 )
@@ -50,6 +53,9 @@ const t = computed(() => ({
   none: `Aún no hay ${props.plural || `${props.noun}s`}`,
   del: `¿Eliminar ${props.feminine ? 'esta' : 'este'} ${props.noun}?`,
 }))
+
+// Eliminar es solo de administradores: para el resto el botón no existe.
+const userStore = useUserStore()
 
 const rows = computed(() => {
   const list = props.filter ? props.crud.items.filter(props.filter) : [...props.crud.items]
@@ -61,7 +67,8 @@ const rows = computed(() => {
   <div class="crud">
     <div class="crud__bar">
       <p v-if="hint" class="crud__hint">{{ hint }}</p>
-      <button class="btn btn--primary btn--sm" type="button" @click="crud.openNew()">
+      <p v-if="readonly" class="crud__hint"><i class="fa-solid fa-lock"></i> {{ copy.readOnly }}</p>
+      <button v-if="!readonly" class="btn btn--primary btn--sm" type="button" @click="crud.openNew()">
         <i class="fa-solid fa-plus"></i> {{ copy.add }} {{ noun }}
       </button>
     </div>
@@ -84,14 +91,16 @@ const rows = computed(() => {
         </button>
         <div class="crud__tools">
           <ToggleSwitch
-            v-if="toggleField"
+            v-if="toggleField && !readonly"
             small
             :label="toggleLabel"
             :model-value="Boolean((item as any)[toggleField])"
             @update:model-value="crud.toggle(item, toggleField)"
           />
-          <button class="crud__icon" type="button" :aria-label="copy.edit" @click="crud.openEdit(item)"><i class="fa-solid fa-pen"></i></button>
-          <button class="crud__icon crud__icon--del" type="button" :aria-label="copy.delete" @click="crud.toDelete = item">
+          <button class="crud__icon" type="button" :aria-label="readonly ? 'Ver' : copy.edit" @click="crud.openEdit(item)">
+            <i :class="readonly ? 'fa-regular fa-eye' : 'fa-solid fa-pen'"></i>
+          </button>
+          <button v-if="userStore.isAdmin && !readonly" class="crud__icon crud__icon--del" type="button" :aria-label="copy.delete" @click="crud.toDelete = item">
             <i class="fa-regular fa-trash-can"></i>
           </button>
         </div>
@@ -99,10 +108,12 @@ const rows = computed(() => {
     </TransitionGroup>
 
     <AdminDrawer :open="crud.drawerOpen" :title="`${crud.editingId ? copy.edit : t.new} ${noun}`" :wide="wide" @close="crud.drawerOpen = false">
-      <slot name="form" />
+      <fieldset class="crud__fieldset" :disabled="readonly">
+        <slot name="form" />
+      </fieldset>
       <template #footer>
         <button class="btn btn--ghost btn--sm" type="button" @click="crud.drawerOpen = false">{{ copy.cancel }}</button>
-        <button class="btn btn--primary btn--sm" type="button" :disabled="crud.saving" @click="crud.save()">
+        <button v-if="!readonly" class="btn btn--primary btn--sm" type="button" :disabled="crud.saving" @click="crud.save()">
           <i v-if="crud.saving" class="fa-solid fa-spinner fa-spin"></i> {{ crud.saving ? copy.saving : copy.save }}
         </button>
       </template>
@@ -124,6 +135,14 @@ const rows = computed(() => {
     font-size: $text-sm;
     color: $ink-muted;
     max-width: 560px;
+  }
+
+  &__fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+    @include flex(column, stretch, flex-start, 1.1rem);
   }
 
   &__list {
