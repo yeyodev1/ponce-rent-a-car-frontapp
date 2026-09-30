@@ -20,7 +20,8 @@ const columns: Column[] = [
   { key: 'plate', label: 'Unidad' },
   { key: 'category', label: 'Categoría' },
   { key: 'rate', label: 'Tarifa diaria', align: 'right' },
-  { key: 'specs', label: 'Detalle', mobileHidden: true },
+  // En móvil también: combustible, asientos y km son lo que se consulta en el patio.
+  { key: 'specs', label: 'Detalle' },
   { key: 'status', label: 'Estado' },
 ]
 </script>
@@ -61,8 +62,8 @@ const columns: Column[] = [
         </template>
         <template #cell-specs="{ row }">
           <span class="vtab__specs">
-            {{ fuelTypes[row.fuel || ''] || 'Gasolina' }} · {{ row.seats || 5 }} asientos
-            <template v-if="row.mileageKm"> · {{ row.mileageKm.toLocaleString('es-EC') }} km</template>
+            {{ fuelTypes[row.fuel || ''] || 'Gasolina' }} · {{ row.seats || 5 }}&nbsp;asientos
+            <template v-if="row.mileageKm"> · {{ row.mileageKm.toLocaleString('es-EC') }}&nbsp;km</template>
           </span>
         </template>
         <template #cell-status="{ row }">
