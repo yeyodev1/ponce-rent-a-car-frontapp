@@ -18,7 +18,8 @@ export interface SessionUser {
   email: string
   name: string
   phone: string
-  accountType: 'customer' | 'admin' | string
+  /** employee = operación diaria; admin = además elimina, gestiona personal y tarifas. */
+  accountType: 'customer' | 'employee' | 'admin' | string
 }
 
 // ─── Contrato del API (ver backapp/docs/API.md) ─────────────────────────
@@ -114,6 +115,21 @@ export interface Category {
   isActive: boolean
   availableUnits?: number
   seo?: SeoFields
+  /** Solo en /public/categories/:slug: unidades reales, dato secundario (se vende la categoría). */
+  units?: CategoryUnit[]
+}
+
+export type FuelType = 'gasoline' | 'diesel' | 'hybrid' | 'electric'
+
+export interface CategoryUnit {
+  brand: string
+  model: string
+  year: number
+  transmission: 'automatic' | 'manual'
+  fuel: FuelType
+  seats: number
+  color: string
+  image: string
 }
 
 export interface Coverage {
