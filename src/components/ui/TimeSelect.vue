@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 
 /**
  * Hora compacta: chips deslizables cada 30 min. Sin rueda de 24 horas: la
@@ -23,10 +23,26 @@ const slots = computed(() => {
   }
   return out
 })
+
+// La hora elegida (precarga, volver atrás, valor por defecto) se deja a la
+// vista: si no, el chip marcado queda fuera de la tira y parece que no hay nada.
+const strip = ref<HTMLElement | null>(null)
+watch(
+  model,
+  async () => {
+    await nextTick()
+    const el = strip.value
+    const on = el?.querySelector<HTMLElement>('.times__item--on')
+    if (!el || !on) return
+    const x = on.offsetLeft - el.offsetLeft
+    if (x < el.scrollLeft || x + on.offsetWidth > el.scrollLeft + el.clientWidth) el.scrollLeft = x - 20
+  },
+  { immediate: true, flush: 'post' },
+)
 </script>
 
 <template>
-  <div class="times" role="radiogroup">
+  <div ref="strip" class="times" role="radiogroup">
     <button
       v-for="slot in slots"
       :key="slot"
@@ -47,6 +63,8 @@ const slots = computed(() => {
   @include flex(row, center, flex-start, 0.5rem);
   overflow-x: auto;
   scroll-snap-type: x proximity;
+  // Sin esto el snap alinea la primera opción al borde y se come el padding
+  scroll-padding-inline: 1.25rem;
   margin-inline: -1.25rem;
   padding: 0.25rem 1.25rem 0.5rem;
   scrollbar-width: none;
