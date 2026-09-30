@@ -71,12 +71,22 @@ onMounted(async () => {
 
   // Desde la ficha de un vehículo: ?categoria=suv ya elige y salta a las fechas.
   const slug = typeof route.query.categoria === 'string' ? route.query.categoria : ''
+  // Desde /vehiculos con fechas: ?retiro=YYYY-MM-DD&devolucion=YYYY-MM-DD precargan el paso 2
+  // (StepDates corrige lo que quede fuera de la ventana al montarse).
+  const ymd = (v: unknown) => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : '')
+  const from = ymd(route.query.retiro)
+  const to = ymd(route.query.devolucion)
+  if (from && to && to > from) {
+    if (booking.pickupDate !== from || booking.returnDate !== to) booking.reservation = null
+    booking.pickupDate = from
+    booking.returnDate = to
+  }
   if (slug) {
     if (booking.categorySlug !== slug) booking.reservation = null
     booking.categorySlug = slug
     track('category_select', { category: slug, source: 'link' })
-    const { categoria: _drop, ...rest } = route.query
-    void _drop
+    const { categoria: _drop, retiro: _from, devolucion: _to, ...rest } = route.query
+    void [_drop, _from, _to]
     await router.replace({ path: '/reservar', query: { ...rest, paso: step.value > 2 ? String(step.value) : '2' } })
   }
 
