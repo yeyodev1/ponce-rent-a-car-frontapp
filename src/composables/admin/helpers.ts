@@ -59,7 +59,10 @@ export function dateTime(iso: string | null | undefined): string {
     hour: '2-digit',
     minute: '2-digit',
     timeZone: 'America/Guayaquil',
-  }).format(new Date(iso))
+  })
+    .format(new Date(iso))
+    // "09:00 a. m." no debe partirse en dos líneas ("a." arriba, "m." abajo).
+    .replace(/\s?([ap])\.\s?m\./g, '\u00a0$1.\u00a0m.')
 }
 
 /** Ids de Mongo generados aquí para filas nuevas no hacen falta: el API los crea. */
