@@ -12,6 +12,9 @@ export const useUserStore = defineStore('user', {
 
   getters: {
     isAuthenticated: (s) => Boolean(s.user),
+    /** Personal del negocio (empleado o administrador): entra al panel. */
+    isStaff: (s) => s.user?.accountType === 'employee' || s.user?.accountType === 'admin',
+    /** Además elimina, gestiona personal, tarifas, configuración, integraciones, exporta y reembolsa. */
     isAdmin: (s) => s.user?.accountType === 'admin',
     hasToken: () => Boolean(localStorage.getItem(TOKEN_KEY)),
   },
