@@ -5,6 +5,7 @@ import { booking } from '@/composables/booking/useBookingState'
 import { fieldError, touched } from '@/composables/booking/useDriverForm'
 import { countryOptions } from '@/composables/booking/countries'
 import PhoneInput from '@/components/ui/PhoneInput.vue'
+import DriverLicenseFields from './DriverLicenseFields.vue'
 import { noUnits } from '@/composables/booking/useBookingFlow'
 
 /** Paso 6: datos del conductor. Validación al salir de cada campo, con el teclado correcto en móvil. */
@@ -99,6 +100,8 @@ const blur = (name: string) => (touched[name] = true)
         <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
       </div>
     </div>
+
+    <DriverLicenseFields />
 
     <p class="driver__privacy"><i class="fa-solid fa-lock"></i>{{ t('booking.driver.privacy') }}</p>
   </form>
