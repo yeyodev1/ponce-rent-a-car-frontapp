@@ -5,7 +5,7 @@ import AdminNavList from './AdminNavList.vue'
 import AdminWordmark from './AdminWordmark.vue'
 import { useBodyScroll } from '@/composables/useBodyScroll'
 import { useUserStore } from '@/stores/user'
-import { copy } from '@/config/admin'
+import { copy, roles } from '@/config/admin'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: [] }>()
@@ -37,7 +37,10 @@ function logout() {
             <AdminNavList @navigate="emit('close')" />
           </div>
           <footer class="sheet__foot">
-            <span class="sheet__email">{{ userStore.user?.email }}</span>
+            <span class="sheet__email">
+              <strong v-if="roles[userStore.user?.accountType || '']" class="sheet__role">{{ roles[userStore.user?.accountType || '']?.label }}</strong>
+              {{ userStore.user?.email }}
+            </span>
             <button class="btn btn--ghost-light btn--sm" type="button" @click="logout">
               <i class="fa-solid fa-arrow-right-from-bracket"></i> {{ copy.logout }}
             </button>
@@ -86,6 +89,12 @@ function logout() {
     @include flex(row, center, space-between, 0.75rem);
     padding: 0.9rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
     border-top: 1px solid rgba($on-dark, 0.08);
+  }
+
+  &__role {
+    display: block;
+    color: $accent;
+    font-size: 0.7rem;
   }
 
   &__email {
