@@ -4,12 +4,12 @@ import PageHeader from '@/components/admin/PageHeader.vue'
 import EmptyState from '@/components/admin/EmptyState.vue'
 import AvailabilityLane from '@/components/admin/availability/AvailabilityLane.vue'
 import { useAvailability } from '@/composables/admin/useAvailability'
-import { reservationStatuses, toneColors } from '@/config/admin'
+import { reservationFilters, toneColors } from '@/config/admin'
 
 const { offset, rows, loading, error, days, load, place, visible } = useAvailability()
 
 const legend = ['pending_documents', 'pending_payment', 'confirmed', 'delivered']
-const colorOf = (status: string) => toneColors[reservationStatuses[status]?.tone || 'neutral']
+const colorOf = (status: string) => toneColors[reservationFilters[status]?.tone || 'neutral']
 const range = computed(() => {
   const a = days.value[0]
   const b = days.value[days.value.length - 1]
@@ -30,7 +30,7 @@ const range = computed(() => {
     <div class="av__meta">
       <strong>{{ range }}</strong>
       <ul class="av__legend">
-        <li v-for="s in legend" :key="s"><span :style="{ background: colorOf(s).fg }"></span>{{ reservationStatuses[s]?.label }}</li>
+        <li v-for="s in legend" :key="s"><span :style="{ background: colorOf(s).fg }"></span>{{ reservationFilters[s]?.label }}</li>
       </ul>
     </div>
 
