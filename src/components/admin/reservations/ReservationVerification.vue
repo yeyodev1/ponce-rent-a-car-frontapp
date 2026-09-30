@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { documentKinds, verificationStatuses } from '@/config/admin'
+import { computed, ref, watch } from 'vue'
+import LicenseFacts from '@/components/admin/customers/LicenseFacts.vue'
+import { documentKinds, licenseCopy, verificationStatuses } from '@/config/admin'
 import type { AdminReservation } from '@/types/admin'
 
 const props = defineProps<{ r: AdminReservation; saving?: boolean }>()
@@ -18,6 +19,8 @@ watch(
 )
 
 const options = ['verified', 'needs_info', 'rejected'] as const
+// El detalle trae el cliente poblado; en listas puede llegar solo el id.
+const customer = computed(() => (typeof props.r.customer === 'object' ? props.r.customer : null))
 </script>
 
 <template>
@@ -41,6 +44,16 @@ const options = ['verified', 'needs_info', 'rejected'] as const
         <span v-else class="verif__missing">Pendiente</span>
       </li>
     </ul>
+
+    <div class="verif__license">
+      <h3 class="verif__subtitle"><i class="fa-solid fa-id-card"></i> {{ licenseCopy.title }}</h3>
+      <LicenseFacts
+        :number="customer?.licenseNumber"
+        :expires-at="customer?.licenseExpiresAt"
+        :country="customer?.licenseCountry"
+        :return-at="r.returnAt"
+      />
+    </div>
 
     <div class="verif__options" role="radiogroup" aria-label="Resultado de la verificación">
       <button
@@ -91,6 +104,21 @@ const options = ['verified', 'needs_info', 'rejected'] as const
     i {
       color: $blue;
     }
+  }
+
+  &__license {
+    padding: 0.7rem 0.8rem 0.3rem;
+    background: $paper;
+    border-radius: 12px;
+  }
+
+  &__subtitle {
+    font-family: $font-principal;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    color: $ink-soft;
+    @include flex(row, center, flex-start, 0.45rem);
   }
 
   &__docs {
