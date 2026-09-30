@@ -25,6 +25,10 @@ export interface DriverDraft {
   phonePrefix: string
   phone: string
   country: string
+  /** Licencia: vigente hasta la devolución. El país de emisión arranca igual al de residencia. */
+  licenseNumber: string
+  licenseExpiresAt: string
+  licenseCountry: string
 }
 
 export interface BookingReservation {
@@ -57,7 +61,18 @@ export interface BookingState {
 }
 
 function blankDriver(): DriverDraft {
-  return { name: '', documentType: 'cedula', documentNumber: '', email: '', phonePrefix: '+593', phone: '', country: 'EC' }
+  return {
+    name: '',
+    documentType: 'cedula',
+    documentNumber: '',
+    email: '',
+    phonePrefix: '+593',
+    phone: '',
+    country: 'EC',
+    licenseNumber: '',
+    licenseExpiresAt: '',
+    licenseCountry: 'EC',
+  }
 }
 
 function blank(): BookingState {
