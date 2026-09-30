@@ -7,10 +7,13 @@ import MoneyInput from '../MoneyInput.vue'
 import ToggleSwitch from '../ToggleSwitch.vue'
 import FormRow from '../FormRow.vue'
 import { useCrud } from '@/composables/admin/useCrud'
+import { useUserStore } from '@/stores/user'
 import { emptyI18n, es } from '@/composables/admin/helpers'
 import { money } from '@/utils/format'
 import type { Extra } from '@/types'
 
+// Tarifas: el empleado las consulta; solo un administrador las cambia.
+const userStore = useUserStore()
 const crud = reactive(
   useCrud<Extra, Partial<Extra>>('extras', {
     empty: () => ({
@@ -34,6 +37,7 @@ const iconClass = (icon?: string) => (icon ? (icon.includes(' ') ? icon : `fa-so
 <template>
   <CrudPanel
     :crud="crud"
+    :readonly="!userStore.isAdmin"
     noun="extra"
     icon="fa-solid fa-puzzle-piece"
     hint="Silla infantil, conductor adicional, GPS… Se suman a la cotización por día o por renta."
