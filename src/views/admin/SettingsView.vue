@@ -5,9 +5,12 @@ import EmptyState from '@/components/admin/EmptyState.vue'
 import FormRow from '@/components/admin/FormRow.vue'
 import I18nField from '@/components/admin/I18nField.vue'
 import { useSettings } from '@/composables/admin/useSettings'
+import { useUserStore } from '@/stores/user'
 import { copy } from '@/config/admin'
 
 const { form, loading, saving, error, load, save } = useSettings()
+// Configuración: el empleado la consulta; solo un administrador la guarda.
+const userStore = useUserStore()
 </script>
 
 <template>
@@ -20,6 +23,8 @@ const { form, loading, saving, error, load, save } = useSettings()
     <EmptyState v-else-if="error" error :message="error.message" @retry="load" />
 
     <form v-else class="settings" @submit.prevent="save">
+      <p v-if="!userStore.isAdmin" class="settings__readonly"><i class="fa-solid fa-lock"></i> {{ copy.readOnly }}</p>
+      <fieldset class="settings__fields" :disabled="!userStore.isAdmin">
       <AdminCard title="Contacto" icon="fa-solid fa-address-card">
         <div class="settings__stack">
           <div>
@@ -74,7 +79,9 @@ const { form, loading, saving, error, load, save } = useSettings()
         </div>
       </AdminCard>
 
-      <div class="settings__bar">
+      </fieldset>
+
+      <div v-if="userStore.isAdmin" class="settings__bar">
         <button class="btn btn--primary" type="submit" :disabled="saving">
           <i :class="saving ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-floppy-disk'"></i>
           {{ saving ? copy.saving : 'Guardar configuración' }}
@@ -112,6 +119,21 @@ const { form, loading, saving, error, load, save } = useSettings()
     input {
       padding-left: 2.7rem;
     }
+  }
+
+  &__fields {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+    @include flex(column, stretch, flex-start, 1rem);
+  }
+
+  &__readonly {
+    font-size: $text-sm;
+    font-weight: 700;
+    color: $ink-muted;
+    @include flex(row, center, flex-start, 0.4rem);
   }
 
   &__bar {
