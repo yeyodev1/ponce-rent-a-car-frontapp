@@ -52,7 +52,8 @@ const colorOf = (status: string) => toneColors[reservationStatuses[status]?.tone
             :style="{ left: `${place(slot).left}%`, width: `${place(slot).width}%`, background: colorOf(slot.status) }"
             :title="`${slot.reservationCode} · ${dateTime(slot.from)} → ${dateTime(slot.to)}`"
           >
-            {{ slot.reservationCode }}
+            <!-- En una reserva de un día "PON-1014" se cortaba en "PON-10": se deja el número (el código completo va en el title). -->
+            {{ slot.reservationCode.replace(/^[A-Z]+-/, '#') }}
           </RouterLink>
         </template>
       </template>
@@ -182,7 +183,7 @@ $cell-min: 46px;
     color: $surface;
     font-size: 0.7rem;
     font-weight: 800;
-    padding: 0 0.5rem;
+    padding: 0 0.4rem;
     @include flex(row, center, flex-start);
     white-space: nowrap;
     overflow: hidden;
