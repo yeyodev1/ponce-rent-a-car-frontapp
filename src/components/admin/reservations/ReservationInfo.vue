@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import StatusBadge from '../StatusBadge.vue'
-import { languages, locations, reservationStatuses, verificationStatuses } from '@/config/admin'
+import {
+  languages,
+  locations,
+  reservationCopy,
+  reservationPaymentStatuses,
+  reservationStatuses,
+  verificationStatuses,
+} from '@/config/admin'
 import { dateTime, es, vehicleLabel } from '@/composables/admin/helpers'
 import { refId, refObj, type AdminReservation } from '@/types/admin'
 import { useCatalogStore } from '@/stores/catalog'
@@ -54,6 +61,13 @@ const details = computed(() =>
     { label: 'Dirección de entrega', value: props.r.pickupAddress },
     { label: 'Idioma', value: languages[props.r.language] },
     {
+      label: 'Canal',
+      value:
+        props.r.channel === 'walk_in'
+          ? `${reservationCopy.walkInChannel}${props.r.createdBy?.name ? ` · ${props.r.createdBy.name}` : ''}`
+          : reservationCopy.webChannel,
+    },
+    {
       label: 'Contrato',
       value:
         props.r.contract?.status && props.r.contract.status !== 'not_required'
@@ -73,7 +87,14 @@ const details = computed(() =>
         <h1 class="rinfo__code">{{ r.code }}</h1>
       </div>
       <div class="rinfo__badges">
-        <StatusBadge :status="r.status" :map="reservationStatuses" />
+        <StatusBadge :status="r.status" :map="reservationStatuses" icon />
+        <StatusBadge
+          v-if="r.paymentStatus"
+          :status="r.paymentStatus"
+          :map="reservationPaymentStatuses"
+          :label="['pending', 'partial'].includes(r.paymentStatus) ? `Pago ${reservationPaymentStatuses[r.paymentStatus]?.label.toLowerCase()}` : undefined"
+          icon
+        />
         <StatusBadge :status="r.verification" :map="verificationStatuses" icon />
       </div>
     </header>
