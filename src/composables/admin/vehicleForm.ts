@@ -1,4 +1,5 @@
 import { refId, type Vehicle, type VehicleStatus } from '@/types/admin'
+import type { FuelType } from '@/types'
 
 /** Formulario de unidad: la categoría viaja como id, no poblada. */
 export interface VehicleForm {
@@ -9,6 +10,11 @@ export interface VehicleForm {
   plate: string
   color: string
   transmission: 'automatic' | 'manual'
+  fuel: FuelType
+  seats: number
+  /** Odómetro en km. */
+  mileageKm: number
+  description: string
   images: string[]
   status: VehicleStatus
   owner: string
@@ -24,6 +30,10 @@ export const emptyVehicle = (): VehicleForm => ({
   plate: '',
   color: '',
   transmission: 'automatic',
+  fuel: 'gasoline',
+  seats: 5,
+  mileageKm: 0,
+  description: '',
   images: [],
   status: 'available',
   owner: '',
@@ -37,4 +47,9 @@ export const vehicleToForm = (v: Vehicle): VehicleForm => ({
   category: refId(v.category),
 })
 
-export const vehicleToBody = (f: VehicleForm) => ({ ...f, plate: f.plate.toUpperCase() })
+export const vehicleToBody = (f: VehicleForm) => ({
+  ...f,
+  plate: f.plate.toUpperCase(),
+  seats: Math.max(1, Number(f.seats) || 1),
+  mileageKm: Math.max(0, Math.round(Number(f.mileageKm) || 0)),
+})
