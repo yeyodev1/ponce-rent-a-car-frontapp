@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import PageHeader from '@/components/admin/PageHeader.vue'
 import AdminTable from '@/components/admin/AdminTable.vue'
@@ -6,15 +7,25 @@ import StatusBadge from '@/components/admin/StatusBadge.vue'
 import SearchBar from '@/components/admin/SearchBar.vue'
 import FilterPills from '@/components/admin/FilterPills.vue'
 import Pagination from '@/components/admin/Pagination.vue'
+import WalkInDrawer from '@/components/admin/reservations/walkin/WalkInDrawer.vue'
 import { useAdminList } from '@/composables/admin/useAdminList'
 import { adminService } from '@/services/admin.service'
-import { reservationStatuses, verificationStatuses } from '@/config/admin'
+import {
+  reservationCopy,
+  reservationFilters,
+  reservationPaymentStatuses,
+  reservationStatuses,
+  verificationStatuses,
+} from '@/config/admin'
 import { money } from '@/utils/format'
 import { es, shortDate, vehicleLabel } from '@/composables/admin/helpers'
 import { refObj, type AdminReservation, type Column } from '@/types/admin'
 
 const router = useRouter()
-const list = useAdminList<AdminReservation>((p) => adminService.list<AdminReservation>('reservations', p))
+const list = useAdminList<AdminReservation>((p) => adminService.list<AdminReservation>('reservations', p), {
+  filters: ['paymentStatus'],
+})
+const walkInOpen = ref(false)
 
 const columns: Column[] = [
   { key: 'code', label: 'Reserva' },
@@ -22,19 +33,31 @@ const columns: Column[] = [
   { key: 'category', label: 'Vehículo' },
   { key: 'dates', label: 'Fechas' },
   { key: 'total', label: 'Total', align: 'right' },
-  { key: 'verification', label: 'Verificación' },
+  { key: 'payment', label: 'Pago' },
+  { key: 'verification', label: 'Verificación', mobileHidden: true },
   { key: 'status', label: 'Estado' },
 ]
 </script>
 
 <template>
   <div>
-    <PageHeader title="Reservas" subtitle="Reservas directas de la web y su estado de pago y verificación." />
+    <PageHeader title="Reservas" subtitle="Reservas de la web y presenciales, con su estado de pago y verificación.">
+      <button class="btn btn--primary btn--sm" type="button" @click="walkInOpen = true">
+        <i class="fa-solid fa-plus"></i> {{ reservationCopy.newReservation }}
+      </button>
+    </PageHeader>
 
     <div class="res__filters">
       <SearchBar v-model="list.filters.q" placeholder="Buscar por código, cliente o cédula" />
     </div>
-    <FilterPills v-model="list.filters.status" :options="reservationStatuses" class="res__pills" />
+    <FilterPills v-model="list.filters.status" :options="reservationFilters" class="res__pills" />
+    <FilterPills
+      :model-value="list.filters.paymentStatus || ''"
+      @update:model-value="(v) => (list.filters.paymentStatus = v)"
+      :options="reservationPaymentStatuses"
+      all-label="Cualquier pago"
+      class="res__pills"
+    />
 
     <section class="res__card">
       <AdminTable
@@ -66,6 +89,10 @@ const columns: Column[] = [
           <strong class="res__money">{{ money(row.pricing?.total || 0) }}</strong>
           <small v-if="row.balance" class="res__balance">Saldo {{ money(row.balance) }}</small>
         </template>
+        <template #cell-payment="{ row }">
+          <StatusBadge v-if="row.paymentStatus" :status="row.paymentStatus" :map="reservationPaymentStatuses" />
+          <span v-else>—</span>
+        </template>
         <template #cell-verification="{ row }"><StatusBadge :status="row.verification" :map="verificationStatuses" /></template>
         <template #cell-status="{ row }"><StatusBadge :status="row.status" :map="reservationStatuses" /></template>
       </AdminTable>
@@ -73,6 +100,8 @@ const columns: Column[] = [
         <Pagination v-model:page="list.page.value" :pages="list.pages.value" :total="list.total.value" />
       </div>
     </section>
+
+    <WalkInDrawer :open="walkInOpen" @close="walkInOpen = false" />
   </div>
 </template>
 
@@ -85,7 +114,11 @@ const columns: Column[] = [
   }
 
   &__pills {
-    margin-bottom: 1rem;
+    margin-bottom: 0.7rem;
+
+    & + & {
+      margin-bottom: 1rem;
+    }
   }
 
   &__card {
