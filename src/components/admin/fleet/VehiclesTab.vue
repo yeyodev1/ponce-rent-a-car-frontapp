@@ -1,64 +1,26 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
 import AdminTable from '../AdminTable.vue'
 import AdminDrawer from '../AdminDrawer.vue'
 import ConfirmDialog from '../ConfirmDialog.vue'
 import StatusBadge from '../StatusBadge.vue'
 import FilterPills from '../FilterPills.vue'
 import VehicleForm from './VehicleForm.vue'
-import { useCrud } from '@/composables/admin/useCrud'
-import { emptyVehicle, vehicleToBody, vehicleToForm, type VehicleForm as Form } from '@/composables/admin/vehicleForm'
-import { adminService } from '@/services/admin.service'
-import { useToastStore } from '@/stores/toast'
-import { copy, vehicleStatuses } from '@/config/admin'
+import { useVehicles } from '@/composables/admin/useVehicles'
+import { useUserStore } from '@/stores/user'
+import { copy, fuelTypes, vehicleStatuses } from '@/config/admin'
 import { es } from '@/composables/admin/helpers'
-import { refId, type Column, type Vehicle, type VehicleStatus } from '@/types/admin'
-import type { ApiError, Category } from '@/types'
+import { money } from '@/utils/format'
+import type { Column, VehicleStatus } from '@/types/admin'
 
-const toast = useToastStore()
-const crud = useCrud<Vehicle, Form>('vehicles', { empty: emptyVehicle, toForm: vehicleToForm, toBody: vehicleToBody })
-const { items, loading, error, form, editingId, drawerOpen, saving, toDelete } = crud
-
-const categories = ref<Category[]>([])
-onMounted(async () => {
-  try {
-    categories.value = (await adminService.list<Category>('categories', { limit: 200 })).items
-  } catch {
-    /* sin categorías el nombre se muestra vacío */
-  }
-})
-
-const catName = (v: Vehicle) => {
-  const c = categories.value.find((x) => x._id === refId(v.category))
-  return c ? es(c.name) : typeof v.category === 'object' && v.category ? es(v.category.name) : '—'
-}
-
-const statusFilter = ref('')
-const catFilter = ref('')
-const rows = computed(() =>
-  items.value.filter(
-    (v) => (!statusFilter.value || v.status === statusFilter.value) && (!catFilter.value || refId(v.category) === catFilter.value),
-  ),
-)
-
-async function setStatus(v: Vehicle, status: VehicleStatus) {
-  const prev = v.status
-  items.value = items.value.map((i) => (i._id === v._id ? { ...i, status } : i))
-  try {
-    await adminService.setVehicleStatus(v._id, status)
-    toast.success(`${v.plate || v.model}: ${vehicleStatuses[status]?.label}`)
-  } catch (e) {
-    items.value = items.value.map((i) => (i._id === v._id ? { ...i, status: prev } : i))
-    toast.error((e as ApiError).message)
-  }
-}
+const userStore = useUserStore()
+const { crud, categories, catName, dailyRate, visibleStatus, statusFilter, catFilter, rows, setStatus } = useVehicles()
+const { loading, error, form, editingId, drawerOpen, saving, toDelete } = crud
 
 const columns: Column[] = [
   { key: 'plate', label: 'Unidad' },
   { key: 'category', label: 'Categoría' },
-  { key: 'year', label: 'Año' },
-  { key: 'color', label: 'Color' },
-  { key: 'owner', label: 'Dueño' },
+  { key: 'rate', label: 'Tarifa diaria', align: 'right' },
+  { key: 'specs', label: 'Detalle', mobileHidden: true },
   { key: 'status', label: 'Estado' },
 ]
 </script>
@@ -88,15 +50,25 @@ const columns: Column[] = [
       >
         <template #cell-plate="{ row }">
           <span class="vtab__unit">
-            <strong>{{ row.brand }} {{ row.model }}</strong>
+            <strong>{{ row.brand }} {{ row.model }} <small v-if="row.year">{{ row.year }}</small></strong>
             <small class="vtab__plate">{{ row.plate || 'Sin placa' }}</small>
           </span>
         </template>
         <template #cell-category="{ row }">{{ catName(row) }}</template>
-        <template #cell-owner="{ row }">{{ row.owner || 'Propia' }}</template>
+        <template #cell-rate="{ row }">
+          <strong v-if="dailyRate(row) !== null" class="vtab__rate">{{ money(dailyRate(row) || 0) }}</strong>
+          <span v-else>—</span>
+        </template>
+        <template #cell-specs="{ row }">
+          <span class="vtab__specs">
+            {{ fuelTypes[row.fuel || ''] || 'Gasolina' }} · {{ row.seats || 5 }} asientos
+            <template v-if="row.mileageKm"> · {{ row.mileageKm.toLocaleString('es-EC') }} km</template>
+          </span>
+        </template>
         <template #cell-status="{ row }">
-          <div class="vtab__status" @click.stop>
-            <StatusBadge :status="row.status" :map="vehicleStatuses" />
+          <StatusBadge v-if="row.isActive === false" status="blocked" :map="vehicleStatuses" />
+          <div v-else class="vtab__status" @click.stop>
+            <StatusBadge :status="visibleStatus(row)" :map="vehicleStatuses" />
             <select :value="row.status" aria-label="Cambiar estado" @change="setStatus(row, ($event.target as HTMLSelectElement).value as VehicleStatus)">
               <option v-for="(def, key) in vehicleStatuses" :key="key" :value="key">{{ def.label }}</option>
             </select>
@@ -104,7 +76,9 @@ const columns: Column[] = [
         </template>
         <template #actions="{ row }">
           <button class="vtab__icon" type="button" :aria-label="copy.edit" @click="crud.openEdit(row)"><i class="fa-solid fa-pen"></i></button>
-          <button class="vtab__icon vtab__icon--del" type="button" :aria-label="copy.delete" @click="toDelete = row"><i class="fa-regular fa-trash-can"></i></button>
+          <button v-if="userStore.isAdmin" class="vtab__icon vtab__icon--del" type="button" :aria-label="copy.delete" @click="toDelete = row">
+            <i class="fa-regular fa-trash-can"></i>
+          </button>
         </template>
       </AdminTable>
     </section>
@@ -122,7 +96,7 @@ const columns: Column[] = [
     <ConfirmDialog
       :open="Boolean(toDelete)"
       :title="`¿Eliminar ${toDelete?.brand} ${toDelete?.model} ${toDelete?.plate}?`"
-      message="Las reservas pasadas conservan su información. Si solo está en taller, cambia su estado a Mantenimiento."
+      message="Las reservas pasadas conservan su información. Si solo está en taller, cambia su estado a En mantenimiento."
       @confirm="crud.confirmDelete"
       @cancel="toDelete = null"
     />
@@ -165,6 +139,11 @@ const columns: Column[] = [
 
     strong {
       color: $ink;
+
+      small {
+        font-weight: 600;
+        color: $ink-muted;
+      }
     }
   }
 
@@ -173,6 +152,16 @@ const columns: Column[] = [
     font-weight: 800;
     letter-spacing: 0.06em;
     color: $ink-muted;
+  }
+
+  &__rate {
+    color: $ink;
+    white-space: nowrap;
+  }
+
+  &__specs {
+    font-size: 0.8rem;
+    color: $ink-soft;
   }
 
   // El select invisible encima del badge: tocar el estado abre las opciones.
