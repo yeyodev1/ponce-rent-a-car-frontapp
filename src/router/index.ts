@@ -155,11 +155,18 @@ router.beforeEach(async (to) => {
     return { name: 'Login', query: { next: to.fullPath }, replace: true }
   }
 
-  if (to.meta.requiresAdmin && !userStore.isAdmin) {
+  // Un cliente con sesión (si existiera) no entra al panel: vuelve al login.
+  if (to.meta.requiresStaff && !userStore.isStaff) {
+    userStore.clear()
     return { name: 'Login', query: { next: to.fullPath }, replace: true }
   }
 
-  if (to.meta.guestOnly && userStore.isAdmin) {
+  // Un empleado que abre una sección de administrador cae en el dashboard.
+  if (to.meta.requiresAdmin && !userStore.isAdmin) {
+    return { path: '/admin', replace: true }
+  }
+
+  if (to.meta.guestOnly && userStore.isStaff) {
     return { path: '/admin', replace: true }
   }
 })
