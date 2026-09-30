@@ -66,6 +66,12 @@ class APIBase {
         if (error.response?.status === 401) {
           window.dispatchEvent(new CustomEvent('auth:token-expired'))
         }
+        // 403 = el rol no alcanza (p. ej. un empleado intentando eliminar): se avisa con el mensaje del API.
+        if (error.response?.status === 403) {
+          window.dispatchEvent(
+            new CustomEvent('api:forbidden', { detail: error.response.data?.message || 'Solo un administrador puede hacer esto' }),
+          )
+        }
         return Promise.reject(error)
       },
     )
