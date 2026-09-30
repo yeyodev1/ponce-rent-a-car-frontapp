@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, reactive } from 'vue'
 import { useCatalogStore } from '@/stores/catalog'
 import { useI18n } from '@/i18n'
 import { site } from '@/config/site'
@@ -8,10 +8,16 @@ import { usePageSeo } from '@/composables/content/usePageSeo'
 import PageHero from '@/components/content/PageHero.vue'
 import CategoryList from '@/components/content/CategoryList.vue'
 import CtaBand from '@/components/content/CtaBand.vue'
+import FleetFilter from '@/components/content/FleetFilter.vue'
+import { useFleetAvailability } from '@/composables/content/useFleetAvailability'
 
 const catalog = useCatalogStore()
 const { t, tx } = useI18n()
 catalog.load()
+
+// reactive(): las refs del filtro se leen sin .value en la plantilla y en FleetFilter.
+const filter = reactive(useFleetAvailability())
+const only = computed(() => (filter.category ? [filter.category] : []))
 
 const chips = computed(() => [
   { icon: 'fa-solid fa-plane-arrival', label: t('content.fleet.chips.airport') },
@@ -55,8 +61,9 @@ const { h1, intro } = usePageSeo({
 
     <section class="fleet__list" aria-labelledby="fleet-list-title">
       <div class="fleet__inner">
+        <FleetFilter :f="filter" class="fleet__filter" />
         <h2 id="fleet-list-title" class="visually-hidden">{{ t('content.fleet.listTitle') }}</h2>
-        <CategoryList />
+        <CategoryList :only="only" :availability="filter.availability" :book-query="filter.bookQuery" />
       </div>
     </section>
 
@@ -111,6 +118,10 @@ const { h1, intro } = usePageSeo({
     @include from('md') {
       padding-top: 3rem;
     }
+  }
+
+  &__filter {
+    margin-bottom: 1.5rem;
   }
 
   &__inner,
