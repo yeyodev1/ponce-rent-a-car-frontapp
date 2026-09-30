@@ -88,32 +88,134 @@ export const locations: Record<string, string> = {
 
 export const languages: Record<string, string> = { es: 'Español', en: 'Inglés' }
 
+/**
+ * Estado visible de la reserva. Los dos "pending_*" internos se muestran como
+ * Pendiente: para el equipo es lo mismo (falta que el cliente complete o pague).
+ */
 export const reservationStatuses: Record<string, StatusDef> = {
-  pending_documents: { label: 'Faltan documentos', tone: 'warning' },
-  pending_payment: { label: 'Pendiente de pago', tone: 'accent' },
-  confirmed: { label: 'Confirmada', tone: 'blue' },
-  delivered: { label: 'Entregada', tone: 'success' },
-  completed: { label: 'Finalizada', tone: 'neutral' },
-  cancelled: { label: 'Cancelada', tone: 'danger' },
-  expired: { label: 'Expirada', tone: 'neutral' },
+  pending_documents: { label: 'Pendiente', tone: 'warning', icon: 'fa-solid fa-hourglass-half' },
+  pending_payment: { label: 'Pendiente', tone: 'accent', icon: 'fa-solid fa-hourglass-half' },
+  confirmed: { label: 'Confirmada', tone: 'blue', icon: 'fa-solid fa-calendar-check' },
+  delivered: { label: 'En curso', tone: 'success', icon: 'fa-solid fa-key' },
+  completed: { label: 'Completada', tone: 'neutral', icon: 'fa-solid fa-flag-checkered' },
+  cancelled: { label: 'Cancelada', tone: 'danger', icon: 'fa-solid fa-ban' },
+  expired: { label: 'Expirada', tone: 'neutral', icon: 'fa-regular fa-clock' },
 }
 
-/** Transiciones que el panel ofrece desde cada estado, con su advertencia. */
-export const reservationActions: Record<string, { to: string; label: string; icon: string; confirm: string; danger?: boolean }[]> = {
-  pending_documents: [
-    { to: 'cancelled', label: 'Cancelar', icon: 'fa-solid fa-ban', confirm: 'La unidad se libera y el cliente ya no podrá continuar la reserva.', danger: true },
-  ],
-  pending_payment: [
-    { to: 'confirmed', label: 'Confirmar manualmente', icon: 'fa-solid fa-check', confirm: 'Úsalo si el cliente pagó por otro medio. La unidad queda reservada.' },
-    { to: 'cancelled', label: 'Cancelar', icon: 'fa-solid fa-ban', confirm: 'La unidad se libera y el cliente ya no podrá continuar la reserva.', danger: true },
-  ],
-  confirmed: [
-    { to: 'delivered', label: 'Entregar vehículo', icon: 'fa-solid fa-key', confirm: 'La unidad pasa a "Rentada" hasta que se finalice la reserva.' },
-    { to: 'cancelled', label: 'Cancelar', icon: 'fa-solid fa-ban', confirm: 'La unidad se libera. Si hubo pago, gestiona la devolución aparte.', danger: true },
-  ],
-  delivered: [
-    { to: 'completed', label: 'Finalizar', icon: 'fa-solid fa-flag-checkered', confirm: 'El vehículo vuelve a quedar disponible y la reserva se cierra.' },
-  ],
+/** Pastillas del filtro: aquí sí se distinguen los dos pendientes. */
+export const reservationFilters: Record<string, StatusDef> = {
+  ...reservationStatuses,
+  pending_documents: { label: 'Pendiente · documentos', tone: 'warning' },
+  pending_payment: { label: 'Pendiente · pago', tone: 'accent' },
+}
+
+/** Pasos del stepper del detalle. Cancelada y Expirada son finales aparte. */
+export const reservationSteps: { key: string; label: string; icon: string; statuses: string[] }[] = [
+  { key: 'pending', label: 'Pendiente', icon: 'fa-solid fa-hourglass-half', statuses: ['pending_documents', 'pending_payment'] },
+  { key: 'confirmed', label: 'Confirmada', icon: 'fa-solid fa-calendar-check', statuses: ['confirmed'] },
+  { key: 'delivered', label: 'En curso', icon: 'fa-solid fa-key', statuses: ['delivered'] },
+  { key: 'completed', label: 'Completada', icon: 'fa-solid fa-flag-checkered', statuses: ['completed'] },
+]
+
+export interface ReservationAction {
+  to: string
+  label: string
+  icon: string
+  confirm: string
+  success: string
+  danger?: boolean
+  /** Exige unidad asignada antes de ejecutarse. */
+  needsVehicle?: boolean
+}
+
+/** Botón de "siguiente acción" por estado destino. El servidor decide cuáles aplican (allowedTransitions). */
+export const reservationActions: Record<string, ReservationAction> = {
+  confirmed: {
+    to: 'confirmed',
+    label: 'Confirmar',
+    icon: 'fa-solid fa-check',
+    confirm: 'La unidad queda reservada para estas fechas.',
+    success: 'Reserva confirmada',
+  },
+  delivered: {
+    to: 'delivered',
+    label: 'Entregar vehículo',
+    icon: 'fa-solid fa-key',
+    confirm: 'La reserva pasa a "En curso" y la unidad queda rentada hasta que se complete.',
+    success: 'Vehículo entregado: reserva en curso',
+    needsVehicle: true,
+  },
+  completed: {
+    to: 'completed',
+    label: 'Completar',
+    icon: 'fa-solid fa-flag-checkered',
+    confirm: 'El vehículo vuelve a quedar disponible y la reserva se cierra.',
+    success: 'Reserva completada',
+  },
+  cancelled: {
+    to: 'cancelled',
+    label: 'Cancelar reserva',
+    icon: 'fa-solid fa-ban',
+    confirm: 'La unidad se libera y la reserva no se puede reactivar. Si hubo pagos, gestiona el reembolso aparte.',
+    success: 'Reserva cancelada',
+    danger: true,
+  },
+}
+
+/** Transiciones del contrato, por si el API todavía no manda allowedTransitions. */
+export const fallbackTransitions: Record<string, string[]> = {
+  pending_documents: ['confirmed', 'cancelled'],
+  pending_payment: ['confirmed', 'cancelled'],
+  confirmed: ['delivered', 'cancelled'],
+  delivered: ['completed'],
+}
+
+export const reservationCopy = {
+  needsVehicle: 'Asigna una unidad antes de entregar el vehículo.',
+  assignFirst: 'Asignar unidad',
+  finalState: (label: string) => `La reserva está ${label.toLowerCase()}: no hay más acciones de estado.`,
+  newReservation: 'Nueva reserva',
+  walkInChannel: 'Presencial',
+  webChannel: 'Web',
+}
+
+/** Estado de pago de la reserva (lo calcula el servidor). */
+export const reservationPaymentStatuses: Record<string, StatusDef> = {
+  pending: { label: 'Pendiente', tone: 'warning', icon: 'fa-solid fa-hourglass-half' },
+  partial: { label: 'Parcial', tone: 'accent', icon: 'fa-solid fa-circle-half-stroke' },
+  paid: { label: 'Pagado', tone: 'success', icon: 'fa-solid fa-circle-check' },
+  refunded: { label: 'Reembolsado', tone: 'neutral', icon: 'fa-solid fa-rotate-left' },
+}
+
+export const paymentMethods: Record<string, string> = {
+  cash: 'Efectivo',
+  transfer: 'Transferencia',
+  card: 'Tarjeta',
+}
+
+export const paymentCopy = {
+  title: 'Pagos',
+  total: 'Total',
+  paid: 'Pagado',
+  balance: 'Saldo',
+  history: 'Historial de pagos',
+  none: 'Todavía no hay pagos registrados.',
+  register: 'Registrar pago',
+  amount: 'Monto recibido',
+  amountHint: (balance: string) => `Saldo pendiente: ${balance}`,
+  method: 'Método',
+  note: 'Nota (opcional)',
+  notePlaceholder: 'N.º de comprobante, quién pagó…',
+  submit: 'Registrar pago',
+  registered: 'Pago registrado',
+  refund: 'Reembolsar',
+  refundTitle: (amount: string) => `¿Reembolsar ${amount}?`,
+  refundMsg: 'El pago queda marcado como reembolsado y el saldo de la reserva se recalcula. Devuelve el dinero por el mismo medio.',
+  refunded: 'Pago reembolsado',
+  closed: 'La reserva está cerrada: no se pueden registrar pagos.',
+  invalidAmount: 'Escribe un monto mayor a cero.',
+  registeredBy: 'Registrado por',
+  online: 'En línea',
 }
 
 export const verificationStatuses: Record<string, StatusDef> = {
@@ -125,16 +227,24 @@ export const verificationStatuses: Record<string, StatusDef> = {
 
 export const vehicleStatuses: Record<string, StatusDef> = {
   available: { label: 'Disponible', tone: 'success' },
-  prereserved: { label: 'Pre-reservada', tone: 'accent' },
+  prereserved: { label: 'Apartada', tone: 'accent' },
   reserved: { label: 'Reservada', tone: 'blue' },
-  rented: { label: 'Rentada', tone: 'navy' },
-  maintenance: { label: 'Mantenimiento', tone: 'warning' },
-  blocked: { label: 'Bloqueada', tone: 'danger' },
+  rented: { label: 'En renta', tone: 'navy' },
+  maintenance: { label: 'En mantenimiento', tone: 'warning' },
+  blocked: { label: 'Inactivo', tone: 'danger' },
+}
+
+export const fuelTypes: Record<string, string> = {
+  gasoline: 'Gasolina',
+  diesel: 'Diésel',
+  hybrid: 'Híbrido',
+  electric: 'Eléctrico',
 }
 
 export const paymentStatuses: Record<string, StatusDef> = {
   pending: { label: 'Pendiente', tone: 'accent' },
   approved: { label: 'Aprobado', tone: 'success' },
+  refunded: { label: 'Reembolsado', tone: 'neutral' },
   canceled: { label: 'Cancelado', tone: 'neutral' },
   error: { label: 'Error', tone: 'danger' },
 }
@@ -143,6 +253,7 @@ export const paymentModes: Record<string, string> = {
   deposit: 'Separación',
   full: 'Pago total',
   balance: 'Saldo',
+  manual: 'Registrado en el local',
   '': '—',
 }
 
@@ -213,6 +324,8 @@ export interface MenuItem {
   to: string
   label: string
   icon: string
+  /** Solo lo ve un administrador (el empleado ni siquiera ve el enlace). */
+  adminOnly?: boolean
 }
 
 export const menu: { title: string; items: MenuItem[] }[] = [
@@ -245,8 +358,9 @@ export const menu: { title: string; items: MenuItem[] }[] = [
   {
     title: 'Sistema',
     items: [
+      { to: '/admin/personal', label: 'Personal', icon: 'fa-solid fa-user-shield', adminOnly: true },
       { to: '/admin/configuracion', label: 'Configuración', icon: 'fa-solid fa-sliders' },
-      { to: '/admin/integraciones', label: 'Integraciones', icon: 'fa-solid fa-plug' },
+      { to: '/admin/integraciones', label: 'Integraciones', icon: 'fa-solid fa-plug', adminOnly: true },
     ],
   },
 ]
@@ -280,6 +394,8 @@ export const copy = {
   more: 'Más',
   all: 'Todos',
   unavailable: 'Esta sección aún no está disponible en el servidor. Vuelve a intentarlo en unos minutos.',
+  forbidden: 'Solo un administrador puede hacer esto',
+  readOnly: 'Solo lectura: los cambios los hace un administrador.',
   whatsappGreeting: (name: string, code: string) =>
     `Hola${name ? ` ${name.split(' ')[0]}` : ''}, te escribimos de Ponce's Rent a Car por tu solicitud ${code}.`,
 }
@@ -310,6 +426,129 @@ export const loginCopy = {
   show: 'Mostrar contraseña',
   hide: 'Ocultar contraseña',
   notAdmin: 'Tu cuenta no tiene acceso al panel administrativo.',
+  inactive: 'Tu cuenta está desactivada. Pide a un administrador que la reactive.',
   back: 'Volver al sitio',
   hello: (name: string) => `Hola, ${name}`,
+}
+
+// ─── Roles y personal ───────────────────────────────────────────────────
+export const roles: Record<string, StatusDef> = {
+  admin: { label: 'Administrador', tone: 'accent', icon: 'fa-solid fa-user-shield' },
+  employee: { label: 'Empleado', tone: 'info', icon: 'fa-solid fa-user' },
+}
+
+export const staffCopy = {
+  title: 'Personal',
+  subtitle: 'Quién entra al panel y qué puede hacer. Las cuentas no se eliminan: se desactivan.',
+  add: 'Nueva persona',
+  edit: 'Editar persona',
+  new: 'Nueva persona',
+  name: 'Nombre completo',
+  email: 'Correo (con él inicia sesión)',
+  phone: 'Teléfono',
+  role: 'Rol',
+  roleHelp: {
+    employee: 'Operación diaria: reservas, pagos, leads, flota y contenido.',
+    admin: 'Todo lo anterior, más eliminar, personal, tarifas, configuración, integraciones, exportar y reembolsar.',
+  } as Record<string, string>,
+  password: 'Contraseña',
+  passwordNew: 'Nueva contraseña (opcional)',
+  passwordHint: 'Mínimo 8 caracteres. Compártela por un canal privado.',
+  passwordKeep: 'Déjala vacía para no cambiarla.',
+  generate: 'Generar',
+  copyPassword: 'Copiar',
+  copied: 'Contraseña copiada',
+  show: 'Mostrar contraseña',
+  hide: 'Ocultar contraseña',
+  active: 'Activo',
+  lastLogin: 'Último acceso',
+  never: 'Nunca',
+  you: 'Tú',
+  selfLocked: 'No puedes desactivar tu propia cuenta.',
+  deactivateTitle: (name: string) => `¿Desactivar a ${name}?`,
+  deactivateMsg: 'No podrá iniciar sesión y su sesión abierta deja de funcionar. Puedes reactivarla cuando quieras.',
+  activateTitle: (name: string) => `¿Reactivar a ${name}?`,
+  activateMsg: 'Podrá volver a iniciar sesión con su contraseña.',
+  deactivate: 'Desactivar',
+  activate: 'Reactivar',
+  activated: 'Cuenta reactivada',
+  deactivated: 'Cuenta desactivada',
+  empty: 'Aún no hay personal registrado',
+  invalid: 'Completa nombre, correo válido y una contraseña de al menos 8 caracteres.',
+}
+
+// ─── Reserva presencial ─────────────────────────────────────────────────
+export const walkInCopy = {
+  title: 'Nueva reserva presencial',
+  subtitle: 'Para el cliente que está en el local o por teléfono. El precio lo calcula el sistema.',
+  vehicle: 'Vehículo',
+  category: 'Categoría',
+  chooseCategory: 'Elige una categoría',
+  unit: 'Unidad (opcional)',
+  anyUnit: 'Asignar automáticamente',
+  dates: 'Fechas',
+  pickupDate: 'Retiro',
+  pickupTime: 'Hora de retiro',
+  returnDate: 'Devolución',
+  returnTime: 'Hora de devolución',
+  pickupLocation: 'Lugar de entrega',
+  returnLocation: 'Lugar de devolución',
+  options: 'Opciones',
+  mileage: 'Kilometraje',
+  limited: 'Limitado',
+  unlimited: 'Ilimitado',
+  coverage: 'Cobertura',
+  extras: 'Extras',
+  driver: 'Conductor',
+  driverName: 'Nombre y apellido',
+  docType: 'Documento',
+  cedula: 'Cédula',
+  passport: 'Pasaporte',
+  docNumber: 'Número de documento',
+  email: 'Correo',
+  phone: 'Teléfono / WhatsApp',
+  country: 'País',
+  notes: 'Notas internas',
+  notesPlaceholder: 'Solo las ve el equipo.',
+  quote: 'Cotización',
+  quoteEmpty: 'Completa categoría, fechas y lugar para ver el precio.',
+  quoteLoading: 'Calculando…',
+  quoteError: 'No se pudo calcular el precio. Revisa los datos.',
+  days: (n: number) => (n === 1 ? '1 día' : `${n} días`),
+  available: (n: number) => (n === 1 ? '1 unidad libre' : `${n} unidades libres`),
+  unavailable: 'Sin unidades libres para esas fechas',
+  total: 'Total',
+  submit: 'Crear reserva',
+  creating: 'Creando…',
+  created: (code: string) => `Reserva ${code} creada`,
+  pastDate: 'El retiro no puede ser en el pasado.',
+  returnBefore: 'La devolución debe ser después del retiro.',
+  missing: 'Completa los campos marcados con *.',
+}
+
+export const shareCopy = {
+  title: 'Enlace para el cliente',
+  text: 'Con este enlace el cliente ve su reserva, sube sus documentos y paga. No necesita cuenta.',
+  copy: 'Copiar enlace',
+  copied: 'Enlace copiado',
+  whatsapp: 'Enviar por WhatsApp',
+  message: (name: string, code: string, url: string) =>
+    `Hola${name ? ` ${name.split(' ')[0]}` : ''}, te saluda Ponce's Rent a Car. Esta es tu reserva ${code}: ${url}`,
+}
+
+// ─── Dashboard ──────────────────────────────────────────────────────────
+export const dashboardCopy = {
+  available: 'Vehículos disponibles',
+  availableHint: 'Unidades activas y libres hoy',
+  pending: 'Pendientes',
+  confirmed: 'Confirmadas',
+  inProgress: 'En curso',
+  revenue: 'Ingresos del mes',
+  revenueHint: 'Pagos aprobados menos reembolsos',
+  today: 'Hoy',
+  deliveries: 'Entregas',
+  returns: 'Devoluciones',
+  noDeliveries: 'No hay entregas programadas para hoy.',
+  noReturns: 'No hay devoluciones programadas para hoy.',
+  todayUnavailable: 'La agenda del día aparecerá cuando el servidor la envíe.',
 }
