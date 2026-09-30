@@ -8,6 +8,8 @@ import BarList from '@/components/admin/BarList.vue'
 import EmptyState from '@/components/admin/EmptyState.vue'
 import StatusBadge from '@/components/admin/StatusBadge.vue'
 import LatestList from '@/components/admin/dashboard/LatestList.vue'
+import DashboardOps from '@/components/admin/dashboard/DashboardOps.vue'
+import DashboardToday from '@/components/admin/dashboard/DashboardToday.vue'
 import { adminService } from '@/services/admin.service'
 import { useUserStore } from '@/stores/user'
 import { money } from '@/utils/format'
@@ -120,10 +122,12 @@ const today = new Intl.DateTimeFormat('es-EC', { weekday: 'long', day: 'numeric'
     <EmptyState v-if="error" error :message="error.message" @retry="load" />
 
     <template v-else>
+      <DashboardOps :data="data" :loading="loading" />
+      <DashboardToday :today="data?.today" :loading="loading" />
+
       <div class="dash__kpis">
         <KpiCard label="Leads del mes" icon="fa-solid fa-inbox" :loading="loading" :value="String(k?.leadsMonth ?? 0)" :current="k?.leadsMonth" :previous="k?.leadsPrevMonth" />
         <KpiCard label="Reservas" icon="fa-solid fa-calendar-check" :loading="loading" :value="String(k?.reservationsMonth ?? 0)" :current="k?.reservationsMonth" :previous="k?.reservationsPrevMonth" />
-        <KpiCard label="Ingresos (mes)" icon="fa-solid fa-sack-dollar" :loading="loading" :value="money(k?.revenueMonth ?? 0)" :current="k?.revenueMonth" :previous="k?.revenuePrevMonth" />
         <KpiCard label="Tasa de conversión" icon="fa-solid fa-bullseye" :loading="loading" :value="conversion" hint="Leads que terminaron en reserva" />
       </div>
 
