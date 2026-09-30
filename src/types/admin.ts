@@ -95,6 +95,10 @@ export interface Customer {
   phone: string
   country: string
   birthDate: string
+  /** Licencia de conducir (YYYY-MM-DD, ISO-2). Vacío = sin registrar. */
+  licenseNumber?: string
+  licenseExpiresAt?: string
+  licenseCountry?: string
   language: 'es' | 'en'
   verification: VerificationStatus
   isClubMember: boolean
@@ -102,6 +106,10 @@ export interface Customer {
   notes: string
   createdAt: string
 }
+
+export type CustomerPatch = Partial<
+  Pick<Customer, 'name' | 'email' | 'phone' | 'licenseNumber' | 'licenseExpiresAt' | 'licenseCountry' | 'notes'>
+>
 
 export interface CustomerDetail extends Customer {
   reservations: AdminReservation[]
@@ -181,7 +189,10 @@ export interface AdminReservation {
   categorySlug: string
   categoryName: I18nText
   vehicle: Ref<Pick<Vehicle, 'brand' | 'model' | 'plate' | 'color'>>
-  customer: Ref<Pick<Customer, 'name' | 'email' | 'phone' | 'documentNumber'>>
+  customer: Ref<
+    Pick<Customer, 'name' | 'email' | 'phone' | 'documentNumber'> &
+      Partial<Pick<Customer, 'licenseNumber' | 'licenseExpiresAt' | 'licenseCountry'>>
+  >
   lead: Ref<{ code: string }>
   pickupAt: string
   returnAt: string
