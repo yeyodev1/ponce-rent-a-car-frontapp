@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import FormRow from '../../FormRow.vue'
+import ToggleSwitch from '../../ToggleSwitch.vue'
 import { locations, walkInCopy as t } from '@/config/admin'
 import { es, vehicleLabel } from '@/composables/admin/helpers'
 import { ymdInGuayaquil } from '@/utils/format'
@@ -72,13 +73,14 @@ const locationLabel = (code: string) =>
           <option v-for="l in locationOptions" :key="l.code" :value="l.code">{{ locationLabel(l.code) }}</option>
         </select>
       </div>
-      <div>
+      <div v-if="!form.sameReturn">
         <label for="wi-rl">{{ t.returnLocation }}</label>
         <select id="wi-rl" v-model="form.returnLocation">
           <option v-for="l in locationOptions" :key="l.code" :value="l.code">{{ locationLabel(l.code) }}</option>
         </select>
       </div>
     </FormRow>
+    <ToggleSwitch v-model="form.sameReturn" :label="t.sameReturn" small />
   </fieldset>
 </template>
 
