@@ -8,10 +8,22 @@ import CategorySkeleton from './CategorySkeleton.vue'
 import StateBlock from './StateBlock.vue'
 
 /** Tarjetas de categorías del catálogo con sus estados de carga, error y vacío. */
-const props = withDefaults(defineProps<{ only?: string[]; limit?: number }>(), {
-  only: () => [],
-  limit: 0,
-})
+const props = withDefaults(
+  defineProps<{
+    only?: string[]
+    limit?: number
+    /** Unidades libres por slug para las fechas elegidas (null = sin fechas). */
+    availability?: Record<string, number> | null
+    /** Query de "Reservar" por categoría (p. ej. con las fechas del filtro). */
+    bookQuery?: (slug: string) => Record<string, string>
+  }>(),
+  {
+    only: () => [],
+    limit: 0,
+    availability: null,
+    bookQuery: undefined,
+  },
+)
 
 const catalog = useCatalogStore()
 const biz = useBusiness()
@@ -66,6 +78,8 @@ const list = computed(() => {
         v-reveal="(i % 3) * 90"
         :category="c"
         :eager="i < 2"
+        :available="availability ? (availability[c.slug] ?? 0) : null"
+        :book-query="bookQuery ? bookQuery(c.slug) : undefined"
       />
     </div>
   </div>
