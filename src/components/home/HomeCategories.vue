@@ -110,8 +110,9 @@ const loading = computed(() => !catalog.loaded && !catalog.error)
       flex-basis: 40%;
     }
 
+    // Tres por fila: con 6 categorías quedan dos filas parejas (y 4 o 5 no dejan una tarjeta estirada).
     @include from('lg') {
-      flex: 1 1 210px;
+      flex: 0 0 calc((100% - 2rem) / 3);
       max-width: none;
     }
   }
