@@ -11,6 +11,7 @@ import MileageInfo from '@/components/content/MileageInfo.vue'
 import RequirementsList from '@/components/content/RequirementsList.vue'
 import StickyBookBar from '@/components/content/StickyBookBar.vue'
 import StateBlock from '@/components/content/StateBlock.vue'
+import CategoryUnits from '@/components/content/CategoryUnits.vue'
 import CtaBand from '@/components/content/CtaBand.vue'
 
 const { t, tx } = useI18n()
@@ -72,6 +73,11 @@ usePageSeo({
               <i class="fa-solid fa-check" aria-hidden="true"></i> {{ f }}
             </li>
           </ul>
+        </section>
+
+        <section v-if="category.units?.length" class="cat__section" aria-labelledby="cat-units">
+          <h2 id="cat-units" v-reveal class="cat__h2">{{ t('content.category.units.title') }}</h2>
+          <CategoryUnits :units="category.units" />
         </section>
 
         <section class="cat__section" aria-labelledby="cat-km">
