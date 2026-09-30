@@ -4,6 +4,7 @@ import { useI18n } from '@/i18n'
 import { formatDateTime, money } from '@/utils/format'
 import { useCatalogStore } from '@/stores/catalog'
 import { booking, effectiveReturnLocation, pickupAt, returnAt } from '@/composables/booking/useBookingState'
+import { formatYmd, maskLicense } from '@/composables/booking/useDriverForm'
 import PriceBreakdown from './PriceBreakdown.vue'
 
 /** Paso 8: todo lo elegido en una sola vista, con el total que se va a cobrar. */
@@ -47,6 +48,13 @@ const rows = computed(() => {
     { icon: 'fa-solid fa-shield-halved', label: t('booking.review.coverage'), value: tx(coverage.value?.name) || booking.coverage },
     { icon: 'fa-solid fa-puzzle-piece', label: t('booking.review.extras'), value: extras.value.join(', ') || t('booking.review.noExtras') },
   )
+  const d = booking.driver
+  if (d.licenseNumber)
+    out.push({
+      icon: 'fa-solid fa-id-card',
+      label: t('booking.review.license'),
+      value: t('booking.review.licenseValue', { number: maskLicense(d.licenseNumber), date: formatYmd(d.licenseExpiresAt) }),
+    })
   return out
 })
 </script>
