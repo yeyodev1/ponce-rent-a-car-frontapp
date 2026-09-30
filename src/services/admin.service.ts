@@ -8,9 +8,14 @@ import type {
   ExportEntity,
   Lead,
   ListParams,
+  Payment,
+  PaymentMethod,
   Settings,
+  StaffInput,
+  StaffMember,
   Vehicle,
   VehicleStatus,
+  WalkInInput,
 } from '@/types/admin'
 
 function query(params: ListParams = {}): string {
@@ -98,11 +103,36 @@ class AdminService extends APIBase {
   async patchReservation(id: string, body: Record<string, unknown>) {
     return (await this.patch<AdminReservation>(`admin/reservations/${id}`, body)).data
   }
+  /** Reserva presencial: el servidor cotiza, congela el precio y devuelve el accessToken. */
+  async createReservation(body: WalkInInput) {
+    const { data } = await this.post<Raw>('admin/reservations', body)
+    return unwrap<AdminReservation>(data, 'reservation') as AdminReservation
+  }
+  async addPayment(id: string, body: { amount: number; method: PaymentMethod; note?: string }) {
+    return (await this.post<Payment>(`admin/reservations/${id}/payments`, body)).data
+  }
+  async refundPayment(paymentId: string) {
+    return (await this.post<Payment>(`admin/payments/${paymentId}/refund`, {})).data
+  }
   async reservationDocument(id: string, kind: string) {
     const { data } = await this.get<Blob>(`admin/reservations/${id}/documents/${kind}`, this.getHeaders(), {
       responseType: 'blob',
     })
     return data
+  }
+
+  // ─── Personal (solo admin) ─────────────────────────────────────────────
+  async staff(params: ListParams = {}) {
+    return this.list<StaffMember>('staff', params)
+  }
+  async createStaff(body: StaffInput) {
+    return (await this.post<StaffMember>('admin/staff', body)).data
+  }
+  async updateStaff(id: string, body: Partial<StaffInput>) {
+    return (await this.put<StaffMember>(`admin/staff/${id}`, body)).data
+  }
+  async setStaffActive(id: string, isActive: boolean) {
+    return (await this.patch<StaffMember>(`admin/staff/${id}/active`, { isActive })).data
   }
 
   // ─── Clientes ──────────────────────────────────────────────────────────
