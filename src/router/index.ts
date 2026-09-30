@@ -174,7 +174,19 @@ router.beforeEach(async (to) => {
 router.afterEach((to) => {
   // Las vistas públicas fijan su título con useSeo; esto cubre las demás.
   const title = to.meta.title as string | undefined
-  if (title) document.title = `${title} — ${site.name}`
+  if (title) {
+    document.title = `${title} | ${site.name}`
+    // Login y panel: fuera del índice y sin arrastrar el canonical de la última
+    // página pública (el login decía ser el home).
+    let robots = document.head.querySelector('meta[name="robots"]')
+    if (!robots) {
+      robots = document.createElement('meta')
+      robots.setAttribute('name', 'robots')
+      document.head.appendChild(robots)
+    }
+    robots.setAttribute('content', 'noindex,nofollow')
+    document.head.querySelector('link[rel="canonical"]')?.remove()
+  }
   trackPageView(to.fullPath)
 })
 
