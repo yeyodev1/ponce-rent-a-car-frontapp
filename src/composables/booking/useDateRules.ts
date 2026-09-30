@@ -55,7 +55,12 @@ export function returnMinTime(): string {
 export function ensureDateDefaults(cfg: PublicConfig | null) {
   const today = ymdInGuayaquil(0)
   const first = firstSlotToday(cfg?.booking.minHoursNotice ?? 3)
-  if (!booking.pickupDate || booking.pickupDate < today || (booking.pickupDate === today && !first)) {
+  // Un retiro fuera de la ventana (enlace viejo, fecha tecleada en /vehiculos)
+  // no tiene chip marcado ni cotiza: se mueve al primer día válido. La
+  // duración la conserva shiftPickup, que StepDates corre al cambiar el retiro.
+  const last = addDays(today, cfg?.booking.maxDaysAhead ?? 5)
+  const p = booking.pickupDate
+  if (!p || p < today || p > last || (p === today && !first)) {
     booking.pickupDate = first ? today : addDays(today, 1)
   }
   const min = pickupMinTime(cfg)
