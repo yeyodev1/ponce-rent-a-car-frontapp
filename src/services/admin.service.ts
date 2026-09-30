@@ -4,6 +4,7 @@ import type {
   AdminReservation,
   AvailabilityRow,
   CustomerDetail,
+  CustomerPatch,
   Dashboard,
   ExportEntity,
   Lead,
@@ -134,10 +135,18 @@ class AdminService extends APIBase {
   async setStaffActive(id: string, isActive: boolean) {
     return (await this.patch<StaffMember>(`admin/staff/${id}/active`, { isActive })).data
   }
+  async deleteStaff(id: string) {
+    await this.delete<void>(`admin/staff/${id}`)
+  }
 
   // ─── Clientes ──────────────────────────────────────────────────────────
   async customer(id: string): Promise<CustomerDetail> {
     const { data } = await this.get<Raw>(`admin/customers/${id}`)
+    const c = unwrap<CustomerDetail>(data, 'customer')
+    return { ...c, reservations: c.reservations || [], leads: c.leads || [] }
+  }
+  async updateCustomer(id: string, body: CustomerPatch): Promise<CustomerDetail> {
+    const { data } = await this.patch<Raw>(`admin/customers/${id}`, body)
     const c = unwrap<CustomerDetail>(data, 'customer')
     return { ...c, reservations: c.reservations || [], leads: c.leads || [] }
   }
