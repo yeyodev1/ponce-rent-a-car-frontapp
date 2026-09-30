@@ -5,6 +5,7 @@ import EmptyState from '../EmptyState.vue'
 import ToggleSwitch from '../ToggleSwitch.vue'
 import CategoryForm from './CategoryForm.vue'
 import { useCrud } from '@/composables/admin/useCrud'
+import { useUserStore } from '@/stores/user'
 import { copy } from '@/config/admin'
 import { emptyI18n, es } from '@/composables/admin/helpers'
 import { money } from '@/utils/format'
@@ -33,6 +34,7 @@ const crud = useCrud<Category, Partial<Category>>('categories', {
   }),
 })
 const { items, loading, error, form, editingId, drawerOpen, saving, toDelete } = crud
+const userStore = useUserStore()
 </script>
 
 <template>
@@ -69,7 +71,7 @@ const { items, loading, error, form, editingId, drawerOpen, saving, toDelete } =
             <ToggleSwitch :model-value="c.isActive" small label="Activa" @update:model-value="crud.toggle(c)" />
             <div class="ctab__actions">
               <button type="button" :aria-label="copy.edit" @click="crud.openEdit(c)"><i class="fa-solid fa-pen"></i></button>
-              <button type="button" class="ctab__del" :aria-label="copy.delete" @click="toDelete = c"><i class="fa-regular fa-trash-can"></i></button>
+              <button v-if="userStore.isAdmin" type="button" class="ctab__del" :aria-label="copy.delete" @click="toDelete = c"><i class="fa-regular fa-trash-can"></i></button>
             </div>
           </div>
         </div>
