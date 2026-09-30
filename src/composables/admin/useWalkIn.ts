@@ -7,6 +7,7 @@ import { useToastStore } from '@/stores/toast'
 import { walkInCopy as t } from '@/config/admin'
 import { toGuayaquilIso, ymdInGuayaquil } from '@/utils/format'
 import { refId, type Vehicle, type WalkInInput } from '@/types/admin'
+import { cleanLicense, licenseIssue } from './useLicense'
 import type { ApiError, LocationCode, MileageOption, Quote } from '@/types'
 
 /**
@@ -66,7 +67,17 @@ function blank() {
     mileage: 'limited' as MileageOption,
     coverage: '',
     extras: {} as Record<string, number>,
-    driver: { name: '', documentType: 'cedula' as 'cedula' | 'passport', documentNumber: '', email: '', phone: '', country: 'EC' },
+    driver: {
+      name: '',
+      documentType: 'cedula' as 'cedula' | 'passport',
+      documentNumber: '',
+      email: '',
+      phone: '',
+      country: 'EC',
+      licenseNumber: '',
+      licenseExpiresAt: '',
+      licenseCountry: 'EC',
+    },
     notes: '',
   }
 }
@@ -194,16 +205,26 @@ export function useWalkIn(onCreated?: () => void) {
     (quote.value?.errors || []).filter((e) => !WINDOW_HINTS.some((w) => e.toLowerCase().includes(w))),
   )
 
+  // La licencia se pide igual que en la web: vigente hasta el día de la devolución.
+  const licenseProblem = computed(() =>
+    licenseIssue(form.driver.licenseNumber, form.driver.licenseExpiresAt, form.returnDate),
+  )
   const driverOk = computed(() => {
     const d = form.driver
-    return d.name.trim().length > 1 && d.documentNumber.trim().length > 3 && /\S+@\S+\.\S+/.test(d.email) && Boolean(d.phone)
+    return (
+      d.name.trim().length > 1 &&
+      d.documentNumber.trim().length > 3 &&
+      /\S+@\S+\.\S+/.test(d.email) &&
+      Boolean(d.phone) &&
+      !licenseProblem.value
+    )
   })
   const canSubmit = computed(() => Boolean(quoteInput.value) && driverOk.value && !creating.value)
 
   async function submit() {
     tried.value = true
     if (!canSubmit.value || !quoteInput.value) {
-      toast.error(dateError.value || t.missing)
+      toast.error(dateError.value || (licenseProblem.value === 'expired' ? t.licenseExpired : t.missing))
       return
     }
     creating.value = true
@@ -218,6 +239,9 @@ export function useWalkIn(onCreated?: () => void) {
         email: d.email.trim().toLowerCase(),
         phone: d.phone,
         country: d.country,
+        licenseNumber: cleanLicense(d.licenseNumber),
+        licenseExpiresAt: d.licenseExpiresAt,
+        licenseCountry: d.licenseCountry || d.country,
       },
       ...(form.notes.trim() ? { notes: form.notes.trim() } : {}),
       language: 'es',
@@ -253,6 +277,7 @@ export function useWalkIn(onCreated?: () => void) {
     quoteWarnings,
     dateError,
     driverOk,
+    licenseProblem,
     tried,
     creating,
     canSubmit,
