@@ -6,6 +6,7 @@ import MoneyInput from '../MoneyInput.vue'
 import I18nField from '../I18nField.vue'
 import ListEditor from '../ListEditor.vue'
 import { useSettings } from '@/composables/admin/useSettings'
+import { useUserStore } from '@/stores/user'
 import { copy, locations } from '@/config/admin'
 import { emptyI18n } from '@/composables/admin/helpers'
 import type { LocationOption } from '@/types'
@@ -13,6 +14,8 @@ import type { LocationOption } from '@/types'
 const { form, loading, saving, error, load, save } = useSettings()
 
 const newLocation = (): LocationOption => ({ code: 'other', label: emptyI18n(), fee: 0 })
+// Configuración: el empleado la consulta; solo un administrador la guarda.
+const userStore = useUserStore()
 </script>
 
 <template>
@@ -22,6 +25,8 @@ const newLocation = (): LocationOption => ({ code: 'other', label: emptyI18n(), 
   <EmptyState v-else-if="error" error :message="error.message" @retry="load" />
 
   <form v-else class="rules" @submit.prevent="save">
+    <p v-if="!userStore.isAdmin" class="rules__readonly"><i class="fa-solid fa-lock"></i> {{ copy.readOnly }}</p>
+    <fieldset class="rules__fields" :disabled="!userStore.isAdmin">
     <AdminCard title="Ventana de reserva en línea" icon="fa-solid fa-calendar-day">
       <FormRow basis="170px">
         <div>
@@ -90,7 +95,9 @@ const newLocation = (): LocationOption => ({ code: 'other', label: emptyI18n(), 
       </ListEditor>
     </AdminCard>
 
-    <div class="rules__bar">
+    </fieldset>
+
+    <div v-if="userStore.isAdmin" class="rules__bar">
       <button class="btn btn--primary" type="submit" :disabled="saving">
         <i :class="saving ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-floppy-disk'"></i>
         {{ saving ? copy.saving : 'Guardar reglas' }}
@@ -115,6 +122,21 @@ const newLocation = (): LocationOption => ({ code: 'other', label: emptyI18n(), 
   }
 
   // Barra de guardado pegada abajo: el formulario es largo en el celular.
+  &__fields {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+    @include flex(column, stretch, flex-start, 1rem);
+  }
+
+  &__readonly {
+    font-size: $text-sm;
+    font-weight: 700;
+    color: $ink-muted;
+    @include flex(row, center, flex-start, 0.4rem);
+  }
+
   &__bar {
     position: sticky;
     bottom: calc(76px + env(safe-area-inset-bottom));
