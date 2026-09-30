@@ -1,23 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import ConfirmDialog from '../ConfirmDialog.vue'
+import { onMounted, ref, watch } from 'vue'
 import { adminService } from '@/services/admin.service'
-import { reservationActions, reservationStatuses, vehicleStatuses } from '@/config/admin'
+import { vehicleStatuses } from '@/config/admin'
 import { vehicleLabel } from '@/composables/admin/helpers'
 import { refId, refObj, type AdminReservation, type Vehicle } from '@/types/admin'
 
 const props = defineProps<{ r: AdminReservation; saving?: boolean }>()
 const emit = defineEmits<{ patch: [body: Record<string, unknown>, success: string] }>()
 
-const actions = computed(() => reservationActions[props.r.status] || [])
-const pending = ref<(typeof actions.value)[number] | null>(null)
-
-function confirm() {
-  const a = pending.value
-  pending.value = null
-  if (a) emit('patch', { status: a.to }, `Reserva ${reservationStatuses[a.to]?.label.toLowerCase() || 'actualizada'}`)
-}
-
+// Los cambios de estado viven en ReservationActions (ciclo estricto); aquí, unidad y notas.
 // Unidades de la misma categoría para asignar o cambiar la del cliente.
 const vehicles = ref<Vehicle[]>([])
 const vehicleId = ref(refId(props.r.vehicle))
@@ -43,23 +34,8 @@ const notes = ref(props.r.notes || '')
 </script>
 
 <template>
-  <section class="manage">
-    <h2 class="manage__title"><i class="fa-solid fa-sliders"></i> Gestionar</h2>
-
-    <div v-if="actions.length" class="manage__actions">
-      <button
-        v-for="a in actions"
-        :key="a.to"
-        type="button"
-        class="btn btn--sm"
-        :class="a.danger ? 'btn--ghost manage__danger' : 'btn--primary'"
-        :disabled="saving"
-        @click="pending = a"
-      >
-        <i :class="a.icon"></i> {{ a.label }}
-      </button>
-    </div>
-    <p v-else class="manage__muted">La reserva está {{ reservationStatuses[r.status]?.label.toLowerCase() }}; no hay acciones de estado.</p>
+  <section id="reservation-manage" class="manage">
+    <h2 class="manage__title"><i class="fa-solid fa-sliders"></i> Unidad y notas</h2>
 
     <div class="manage__field">
       <label for="assign-vehicle">Unidad asignada</label>
@@ -74,7 +50,7 @@ const notes = ref(props.r.notes || '')
           class="btn btn--dark btn--sm"
           type="button"
           :disabled="saving || vehicleId === refId(r.vehicle)"
-          @click="emit('patch', { vehicleId: vehicleId || null }, 'Unidad asignada')"
+          @click="emit('patch', { vehicleId: vehicleId || null }, vehicleId ? 'Unidad asignada' : 'Unidad quitada')"
         >
           Asignar
         </button>
@@ -93,16 +69,6 @@ const notes = ref(props.r.notes || '')
         Guardar notas
       </button>
     </div>
-
-    <ConfirmDialog
-      :open="Boolean(pending)"
-      :title="`${pending?.label}: ${r.code}`"
-      :message="pending?.confirm"
-      :confirm-label="pending?.label"
-      :danger="Boolean(pending?.danger)"
-      @confirm="confirm"
-      @cancel="pending = null"
-    />
   </section>
 </template>
 
@@ -123,21 +89,6 @@ const notes = ref(props.r.notes || '')
     i {
       color: $blue;
     }
-  }
-
-  &__actions {
-    @include flex(row, center, flex-start, 0.5rem);
-    flex-wrap: wrap;
-  }
-
-  &__danger {
-    color: $danger;
-    border-color: rgba($danger, 0.4);
-  }
-
-  &__muted {
-    font-size: $text-sm;
-    color: $ink-muted;
   }
 
   &__field {
