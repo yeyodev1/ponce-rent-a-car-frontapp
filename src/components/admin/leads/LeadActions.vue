@@ -2,12 +2,14 @@
 import { computed } from 'vue'
 import { copy, leadStatuses, leadStatusOrder } from '@/config/admin'
 import { telLink, waLink } from '@/composables/admin/helpers'
+import { useUserStore } from '@/stores/user'
 import { refId, refObj, type Lead } from '@/types/admin'
 import type { LeadStatus } from '@/types'
 
 const props = defineProps<{ lead: Lead; saving?: boolean }>()
 const emit = defineEmits<{ status: [value: LeadStatus]; delete: [] }>()
 
+const userStore = useUserStore()
 const phone = computed(() => props.lead.whatsapp || props.lead.phone)
 const wa = computed(() =>
   phone.value ? waLink(phone.value, copy.whatsappGreeting(props.lead.name, props.lead.code)) : '',
@@ -50,7 +52,7 @@ const customerId = computed(() => refId(props.lead.customer))
       </RouterLink>
     </div>
 
-    <button class="acts__delete" type="button" @click="emit('delete')">
+    <button v-if="userStore.isAdmin" class="acts__delete" type="button" @click="emit('delete')">
       <i class="fa-regular fa-trash-can"></i> Eliminar lead
     </button>
   </aside>
