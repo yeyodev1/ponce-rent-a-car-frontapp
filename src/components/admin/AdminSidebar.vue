@@ -200,4 +200,21 @@ function logout() {
     }
   }
 }
+
+// Laptops de 800 px de alto: se recorta aire arriba y abajo para que el menú
+// completo (hasta Integraciones) quepa sin scroll escondido.
+@media (max-height: 860px) {
+  .side__brand {
+    min-height: 0;
+    padding-block: 1rem 0.6rem;
+  }
+
+  .side__scroll {
+    padding-block: 0.25rem 0.5rem;
+  }
+
+  .side__collapse {
+    padding-block: 0.35rem;
+  }
+}
 </style>
