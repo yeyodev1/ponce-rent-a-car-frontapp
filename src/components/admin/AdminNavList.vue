@@ -1,18 +1,28 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { menu } from '@/config/admin'
+import { useUserStore } from '@/stores/user'
 
 defineProps<{ collapsed?: boolean }>()
 const emit = defineEmits<{ navigate: [] }>()
 
 const route = useRoute()
+const userStore = useUserStore()
+
+// Lo que el rol no puede usar no se muestra (no basta con deshabilitarlo).
+const groups = computed(() =>
+  menu
+    .map((g) => ({ ...g, items: g.items.filter((i) => !i.adminOnly || userStore.isAdmin) }))
+    .filter((g) => g.items.length),
+)
 
 const isActive = (to: string) => (to === '/admin' ? route.path === '/admin' : route.path.startsWith(to))
 </script>
 
 <template>
   <nav class="nav" :class="{ 'nav--collapsed': collapsed }" aria-label="Menú del panel">
-    <div v-for="group in menu" :key="group.title" class="nav__group">
+    <div v-for="group in groups" :key="group.title" class="nav__group">
       <p class="nav__title">{{ group.title }}</p>
       <RouterLink
         v-for="item in group.items"
