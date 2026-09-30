@@ -55,6 +55,13 @@ onMounted(() => {
     flex-direction: column;
   }
 
+  // Mientras llega el chunk de la vista, el main vacío dejaba el footer
+  // arriba del todo y al cargar saltaba abajo (CLS ≈ 1 en el home móvil).
+  &--public:not(.app--focus) &__main {
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
   // El header es fijo y no reserva espacio: los wizards no tienen hero que lo
   // compense, así que el layout les deja el hueco.
   &--focus &__main {
