@@ -30,8 +30,10 @@ class PublicService extends APIBase {
   async geo() {
     return (await this.get<{ country: string }>('public/geo')).data
   }
-  async categories() {
-    return (await this.get<Category[]>('public/categories')).data
+  /** Con from/to (ISO) el API calcula availableUnits para ese rango. */
+  async categories(range?: { from: string; to: string }) {
+    const qs = range ? `?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}` : ''
+    return (await this.get<Category[]>(`public/categories${qs}`)).data
   }
   async category(slug: string) {
     return (await this.get<Category>(`public/categories/${slug}`)).data
