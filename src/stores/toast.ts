@@ -13,6 +13,8 @@ export const useToastStore = defineStore('toast', {
 
   actions: {
     show(message: string, type: Toast['type'] = 'info', duration = 3800) {
+      // El mismo aviso dos veces seguidas (p. ej. un 403 global y el catch de la vista) se muestra una sola vez.
+      if (this.toasts.some((t) => t.message === message && t.type === type)) return
       const id = nextId++
       this.toasts.push({ id, type, message })
       setTimeout(() => this.dismiss(id), duration)
