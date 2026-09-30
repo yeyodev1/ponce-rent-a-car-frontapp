@@ -49,7 +49,7 @@ const activeExtras = computed(() => catalog.extras.filter((x) => x.isActive !== 
           <WalkInOptions :form="form" :coverages="catalog.coverages" :extras="activeExtras" />
         </div>
         <div class="walkin__col">
-          <WalkInDriver :form="form" :tried="w.tried.value" />
+          <WalkInDriver :form="form" :tried="w.tried.value" :license-problem="w.licenseProblem.value" />
           <div>
             <label for="wi-notes">{{ t.notes }}</label>
             <textarea id="wi-notes" v-model="form.notes" rows="2" :placeholder="t.notesPlaceholder"></textarea>
