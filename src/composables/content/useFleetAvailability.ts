@@ -70,10 +70,18 @@ export function useFleetAvailability() {
     }
   }
 
+  // El max del input no impide teclear otra fecha: se acota a la ventana de reserva.
   // Al elegir el retiro se sugiere una devolución a 3 días si falta o quedó antes.
-  watch(pickup, (p) => {
-    if (p && (!dropoff.value || dropoff.value <= p)) dropoff.value = addDays(p, 3)
-  })
+  // Sin la configuración cargada todavía no se sabe la ventana: se espera a ella.
+  watch(
+    [pickup, () => catalog.config],
+    ([p]) => {
+      if (p && p < today) pickup.value = today
+      else if (p && catalog.config && p > pickupMax.value) pickup.value = pickupMax.value
+      else if (p && (!dropoff.value || dropoff.value <= p)) dropoff.value = addDays(p, 3)
+    },
+    { immediate: true },
+  )
 
   watch([pickup, dropoff], check, { immediate: true })
 
