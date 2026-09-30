@@ -169,7 +169,7 @@ const details = computed(() =>
   }
 
   &__badges {
-    @include flex(row, center, flex-end, 0.35rem);
+    @include flex(row, center, flex-start, 0.35rem);
     flex-wrap: wrap;
   }
 
