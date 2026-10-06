@@ -247,6 +247,7 @@ export const paymentStatuses: Record<string, StatusDef> = {
   refunded: { label: 'Reembolsado', tone: 'neutral' },
   canceled: { label: 'Cancelado', tone: 'neutral' },
   error: { label: 'Error', tone: 'danger' },
+  voided: { label: 'Anulado', tone: 'neutral' },
 }
 
 export const paymentModes: Record<string, string> = {
