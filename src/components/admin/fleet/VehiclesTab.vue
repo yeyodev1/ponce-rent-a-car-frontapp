@@ -76,6 +76,9 @@ const columns: Column[] = [
           </div>
         </template>
         <template #actions="{ row }">
+          <RouterLink :to="`/admin/flota/unidades/${row._id}`" class="vtab__icon vtab__history" aria-label="Historial" title="Historial">
+            <i class="fa-solid fa-clock-rotate-left"></i><span>Historial</span>
+          </RouterLink>
           <button class="vtab__icon" type="button" :aria-label="copy.edit" @click="crud.openEdit(row)"><i class="fa-solid fa-pen"></i></button>
           <button v-if="userStore.isAdmin" class="vtab__icon vtab__icon--del" type="button" :aria-label="copy.delete" @click="toDelete = row">
             <i class="fa-regular fa-trash-can"></i>
@@ -206,6 +209,16 @@ const columns: Column[] = [
       color: $danger;
       background: $danger-bg;
     }
+  }
+
+  // "Historial" con texto: es la puerta a actas, rentas y bitácora de la unidad.
+  &__history {
+    width: auto;
+    padding: 0 0.6rem;
+    @include flex(row, center, center, 0.35rem);
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: $blue;
   }
 }
 </style>
