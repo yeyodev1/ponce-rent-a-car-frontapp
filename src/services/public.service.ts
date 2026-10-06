@@ -21,6 +21,7 @@ import type {
   SeoPage,
   Attribution,
 } from '@/types'
+import type { PublicVehicle } from '@/types/contract'
 
 /** Todo lo que el sitio público le pide al API. Sin sesión. */
 class PublicService extends APIBase {
@@ -37,6 +38,10 @@ class PublicService extends APIBase {
   }
   async category(slug: string) {
     return (await this.get<Category>(`public/categories/${slug}`)).data
+  }
+  /** Ficha pública de una unidad (/vehiculos/:categoria/:unidad). */
+  async vehicle(slug: string) {
+    return (await this.get<PublicVehicle>(`public/vehicles/${encodeURIComponent(slug)}`)).data
   }
   async coverages() {
     return (await this.get<Coverage[]>('public/coverages')).data
