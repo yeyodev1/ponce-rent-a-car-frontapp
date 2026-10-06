@@ -76,7 +76,7 @@ export function usePaymentConfirm() {
 
   /** Reintento: si el asistente aún tiene esta reserva, vuelve al paso de pago; si no, a la reserva. */
   function retryTarget() {
-    if (booking.reservation && booking.reservation.code === code.value) return { path: '/reservar', query: { paso: '9' } }
+    if (booking.reservation && booking.reservation.code === code.value) return { path: '/reservar', query: { paso: '10' } }
     if (code.value && token.value) return { path: `/reserva/${code.value}`, query: { t: token.value } }
     return { path: '/reservar' }
   }
