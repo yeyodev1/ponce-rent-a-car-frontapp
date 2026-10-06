@@ -95,7 +95,7 @@ async function save() {
         <I18nField v-model="form.intro" label="Texto de introducción" multiline :rows="3" />
         <div>
           <label for="seo-can">URL canónica</label>
-          <input id="seo-can" v-model.trim="form.canonical" type="url" placeholder="https://poncesrentacar.com/…" />
+          <input id="seo-can" v-model.trim="form.canonical" type="url" placeholder="https://poncesrentacar.com.ec/…" />
         </div>
         <ImageUpload v-model="form.ogImage" label="Imagen al compartir (Open Graph)" compact />
       </template>
