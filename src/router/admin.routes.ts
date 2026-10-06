@@ -112,6 +112,24 @@ const adminRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/admin/StaffView.vue'),
         meta: { title: 'Personal', requiresAdmin: true },
       },
+      {
+        path: 'flota/unidades/:id',
+        name: 'AdminVehicleDetail',
+        component: () => import('@/views/admin/VehicleDetailView.vue'),
+        meta: { title: 'Historial del vehículo' },
+      },
+      {
+        path: 'contratos',
+        name: 'AdminContracts',
+        component: () => import('@/views/admin/ContractTemplatesView.vue'),
+        meta: { title: 'Contrato', requiresAdmin: true },
+      },
+      {
+        path: 'auditoria',
+        name: 'AdminAudit',
+        component: () => import('@/views/admin/AuditLogView.vue'),
+        meta: { title: 'Registro de accesos', requiresAdmin: true },
+      },
     ],
   },
 ]
