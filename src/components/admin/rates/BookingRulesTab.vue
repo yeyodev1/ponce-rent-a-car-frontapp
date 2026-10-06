@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import AdminCard from '../AdminCard.vue'
 import EmptyState from '../EmptyState.vue'
 import FormRow from '../FormRow.vue'
 import MoneyInput from '../MoneyInput.vue'
 import I18nField from '../I18nField.vue'
 import ListEditor from '../ListEditor.vue'
+import ToggleSwitch from '../ToggleSwitch.vue'
 import { useSettings } from '@/composables/admin/useSettings'
 import { useUserStore } from '@/stores/user'
 import { copy, locations } from '@/config/admin'
@@ -12,6 +14,12 @@ import { emptyI18n } from '@/composables/admin/helpers'
 import type { LocationOption } from '@/types'
 
 const { form, loading, saving, error, load, save } = useSettings()
+
+// booking.contractRequired (v1.3): si falta en lo guardado, el API lo trata como obligatorio.
+const contractRequired = computed({
+  get: () => (form.value.booking as { contractRequired?: boolean }).contractRequired !== false,
+  set: (v: boolean) => Object.assign(form.value.booking, { contractRequired: v }),
+})
 
 const newLocation = (): LocationOption => ({ code: 'other', label: emptyI18n(), fee: 0 })
 // Configuración: el empleado la consulta; solo un administrador la guarda.
@@ -65,6 +73,11 @@ const userStore = useUserStore()
       <FormRow>
         <MoneyInput v-model="form.booking.guaranteeAmount" label="Garantía del vehículo" hint="Informativa: se bloquea en el retiro con Datafast, no se cobra online." />
       </FormRow>
+    </AdminCard>
+
+    <AdminCard title="Contrato en línea" icon="fa-solid fa-file-signature">
+      <ToggleSwitch v-model="contractRequired" label="Exigir que el cliente acepte el contrato antes de pagar" />
+      <p class="rules__hint">Si lo apagas, el paso Contrato de la reserva web queda opcional. El texto se edita en Contrato.</p>
     </AdminCard>
 
     <AdminCard title="Kilometraje" icon="fa-solid fa-gauge">
