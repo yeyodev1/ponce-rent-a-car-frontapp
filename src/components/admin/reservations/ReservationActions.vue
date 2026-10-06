@@ -17,7 +17,11 @@ import { refId, type AdminReservation } from '@/types/admin'
  * "Entregar" sin unidad asignada queda deshabilitado: el API respondería 409.
  */
 const props = defineProps<{ r: AdminReservation; saving?: boolean }>()
-const emit = defineEmits<{ patch: [body: Record<string, unknown>, success: string]; assign: [] }>()
+const emit = defineEmits<{
+  patch: [body: Record<string, unknown>, success: string]
+  assign: []
+  handover: [type: 'delivery' | 'return', fallback: () => void]
+}>()
 
 const allowed = computed(() => props.r.allowedTransitions ?? fallbackTransitions[props.r.status] ?? [])
 const forward = computed(() =>
@@ -30,7 +34,13 @@ const blocked = (a: ReservationAction) => Boolean(a.needsVehicle && !hasVehicle.
 const pending = ref<ReservationAction | null>(null)
 
 function ask(a: ReservationAction) {
-  if (!blocked(a)) pending.value = a
+  if (blocked(a)) return
+  // Entregar y completar pasan por el acta (km, combustible, fotos, daños).
+  if (a.to === 'delivered' || a.to === 'completed') {
+    emit('handover', a.to === 'delivered' ? 'delivery' : 'return', () => (pending.value = a))
+    return
+  }
+  pending.value = a
 }
 
 function confirm() {
