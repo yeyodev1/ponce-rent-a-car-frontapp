@@ -6,15 +6,21 @@ import StatusBadge from '@/components/admin/StatusBadge.vue'
 import SearchBar from '@/components/admin/SearchBar.vue'
 import FilterPills from '@/components/admin/FilterPills.vue'
 import Pagination from '@/components/admin/Pagination.vue'
+import VoidPaymentDialog from '@/components/admin/payments/VoidPaymentDialog.vue'
+import { usePaymentVoid } from '@/composables/admin/usePaymentVoid'
+import { paymentStatusesV13, voidCopy } from '@/config/admin/ops'
 import { useAdminList } from '@/composables/admin/useAdminList'
 import { adminService } from '@/services/admin.service'
-import { paymentCopy, paymentMethods, paymentProviders, paymentStatuses } from '@/config/admin'
+import { paymentCopy, paymentMethods, paymentProviders } from '@/config/admin'
 import { money } from '@/utils/format'
 import { dateTime } from '@/composables/admin/helpers'
 import { refId, type Column, type Payment } from '@/types/admin'
 
 const router = useRouter()
 const list = useAdminList<Payment>((p) => adminService.list<Payment>('payments', p), { filters: ['method'] })
+
+// Anular deja el pago como "Anulado"; el saldo de la reserva lo recalcula el servidor.
+const voider = usePaymentVoid(() => list.load())
 
 const columns: Column[] = [
   { key: 'reservationCode', label: 'Reserva' },
@@ -42,7 +48,7 @@ function open(p: Payment) {
     <div class="pay__filters">
       <SearchBar v-model="list.filters.q" placeholder="Buscar por reserva o transacción" />
     </div>
-    <FilterPills v-model="list.filters.status" :options="paymentStatuses" class="pay__pills" />
+    <FilterPills v-model="list.filters.status" :options="paymentStatusesV13" class="pay__pills" />
     <FilterPills
       :model-value="list.filters.method || ''"
       :options="paymentMethods"
@@ -68,12 +74,24 @@ function open(p: Payment) {
         <template #cell-method="{ row }">{{ methodOf(row) }}</template>
         <template #cell-registeredBy="{ row }"><span class="pay__by">{{ byOf(row) }}</span></template>
         <template #cell-createdAt="{ row }">{{ dateTime(row.approvedAt || row.createdAt) }}</template>
-        <template #cell-status="{ row }"><StatusBadge :status="row.status" :map="paymentStatuses" /></template>
+        <template #cell-status="{ row }"><StatusBadge :status="row.status" :map="paymentStatusesV13" /></template>
+        <template #actions="{ row }">
+          <button v-if="voider.canVoid(row)" type="button" class="pay__void" :aria-label="`${voidCopy.action} ${row.reservationCode}`" @click="voider.ask(row)">
+            <i class="fa-solid fa-ban"></i> {{ voidCopy.action }}
+          </button>
+        </template>
       </AdminTable>
       <div class="pay__pager">
         <Pagination v-model:page="list.page.value" :pages="list.pages.value" :total="list.total.value" />
       </div>
     </section>
+    <VoidPaymentDialog
+      v-model:reason="voider.reason.value"
+      :payment="voider.target.value"
+      :error="voider.error.value"
+      @confirm="voider.confirm"
+      @cancel="voider.cancel"
+    />
   </div>
 </template>
 
@@ -109,6 +127,15 @@ function open(p: Payment) {
 
   &__amount {
     color: $ink;
+  }
+
+  &__void {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: $danger;
+    min-height: 36px;
+    padding: 0 0.3rem;
+    white-space: nowrap;
   }
 
   &__by {
