@@ -17,12 +17,15 @@ import StepExtras from '@/components/booking/StepExtras.vue'
 import StepDriver from '@/components/booking/StepDriver.vue'
 import StepDocuments from '@/components/booking/StepDocuments.vue'
 import StepReview from '@/components/booking/StepReview.vue'
+import StepContract from '@/components/booking/StepContract.vue'
 import StepPayment from '@/components/booking/StepPayment.vue'
 import { booking } from '@/composables/booking/useBookingState'
 import { startQuoteWatcher } from '@/composables/booking/useQuote'
 import { useBookingFlow, creating } from '@/composables/booking/useBookingFlow'
 import { direction, TOTAL_STEPS, type StepKey } from '@/composables/booking/useBookingSteps'
 import { useDisplayPricing } from '@/composables/booking/useDisplayPricing'
+import { contractNeeded } from '@/composables/booking/useContract'
+import { useToastStore } from '@/stores/toast'
 
 /**
  * Ruta B: reserva directa. Esta vista solo compone: el marco del paso, el
@@ -46,6 +49,7 @@ const STEPS: Record<StepKey, Component> = {
   driver: StepDriver,
   documents: StepDocuments,
   review: StepReview,
+  contract: StepContract,
   payment: StepPayment,
 }
 
@@ -54,7 +58,7 @@ const copy = computed(() => ({
   title: t(`booking.steps.${key.value}.title`),
   subtitle: t(`booking.steps.${key.value}.subtitle`),
 }))
-const showHold = computed(() => Boolean(booking.reservation?.holdExpiresAt) && step.value >= 7 && step.value <= 9)
+const showHold = computed(() => Boolean(booking.reservation?.holdExpiresAt) && step.value >= 7 && step.value <= TOTAL_STEPS)
 
 function next() {
   if (key.value === 'extras') {
@@ -95,6 +99,16 @@ onMounted(async () => {
 })
 
 watch(step, () => clamp())
+
+// El checkout respondió contract_required: el contrato no está aceptado, se vuelve a ese paso.
+const toast = useToastStore()
+watch(contractNeeded, (needed) => {
+  if (!needed) return
+  contractNeeded.value = false
+  booking.contractSigned = false
+  toast.error(t('booking.contract.required'))
+  go(9, true)
+})
 
 // Un slug que no existe (enlace viejo) no debe dejar al cliente en un paso sin vehículo.
 watch(
