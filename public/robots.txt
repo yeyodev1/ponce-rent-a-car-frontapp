@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://poncesrentacar.com/sitemap.xml
+Sitemap: https://poncesrentacar.com.ec/sitemap.xml
