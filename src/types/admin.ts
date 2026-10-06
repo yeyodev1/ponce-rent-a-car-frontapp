@@ -353,6 +353,7 @@ export interface Settings {
   }
   booking: {
     maxDaysAhead: number
+    contractRequired?: boolean
     minHoursNotice: number
     holdMinutes: number
     depositMode: 'fixed' | 'percent' | 'none'
