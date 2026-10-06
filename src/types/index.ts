@@ -79,6 +79,8 @@ export interface PublicConfig {
   }
   booking: {
     maxDaysAhead: number
+    /** Si es true, hay que aceptar el contrato antes de pagar en línea. */
+    contractRequired?: boolean
     minHoursNotice: number
     depositMode: 'fixed' | 'percent' | 'none'
     depositValue: number
@@ -122,6 +124,8 @@ export interface Category {
 export type FuelType = 'gasoline' | 'diesel' | 'hybrid' | 'electric'
 
 export interface CategoryUnit {
+  /** Página pública: /vehiculos/<categoria>/<slug>. */
+  slug?: string
   brand: string
   model: string
   year: number
@@ -383,7 +387,13 @@ export interface PublicReservation {
   driver: { name: string; email: string; phone?: string }
   documents: { license: boolean; identity: boolean }
   holdExpiresAt: string | null
-  contract: { status: string; fileUrl: string }
+  contract: {
+    status: string
+    fileUrl: string
+    version?: string
+    hash?: string
+    signedAt?: string | null
+  }
 }
 
 export interface CheckoutConfig {
