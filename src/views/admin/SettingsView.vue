@@ -43,7 +43,7 @@ const userStore = useUserStore()
           </FormRow>
           <div>
             <label for="s-email">Correo</label>
-            <input id="s-email" v-model.trim="form.business.email" type="email" placeholder="reservas@poncesrentacar.com" />
+            <input id="s-email" v-model.trim="form.business.email" type="email" placeholder="reservas@poncesrentacar.com.ec" />
           </div>
         </div>
       </AdminCard>
