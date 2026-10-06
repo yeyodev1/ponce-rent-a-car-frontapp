@@ -9,6 +9,9 @@ import ReservationPricing from '@/components/admin/reservations/ReservationPrici
 import ReservationShareLink from '@/components/admin/reservations/ReservationShareLink.vue'
 import ReservationVerification from '@/components/admin/reservations/ReservationVerification.vue'
 import ReservationManage from '@/components/admin/reservations/ReservationManage.vue'
+import ReservationHandover from '@/components/admin/reservations/ReservationHandover.vue'
+import ReservationGuarantee from '@/components/admin/reservations/ReservationGuarantee.vue'
+import ReservationContract from '@/components/admin/reservations/ReservationContract.vue'
 import { useReservation } from '@/composables/admin/useReservation'
 import { readShareToken } from '@/composables/admin/useWalkIn'
 
@@ -54,10 +57,14 @@ function goAssign() {
           @open="openDocument"
           @save="(b) => patch(b, 'Verificación guardada')"
         />
+        <!-- Actas de entrega y devolución (cambian el estado: se recarga al terminar). -->
+        <ReservationHandover :r="reservation" @changed="load" />
       </div>
       <div class="rdetail__side">
         <ReservationShareLink v-if="shareToken" :r="reservation" :token="shareToken" />
+        <ReservationContract :r="reservation" @changed="load" />
         <ReservationPayments :r="reservation" :saving="saving" @pay="addPayment" @refund="refund" />
+        <ReservationGuarantee :r="reservation" @changed="load" />
         <ReservationManage :r="reservation" :saving="saving" @patch="patch" />
         <ReservationPricing :r="reservation" />
       </div>
