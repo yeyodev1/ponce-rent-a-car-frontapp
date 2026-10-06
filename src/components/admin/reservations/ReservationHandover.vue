@@ -44,6 +44,20 @@ function fix(insp: Inspection) {
   h.startFix(insp)
 }
 
+/**
+ * Los botones "Entregar vehículo" / "Completar" del encabezado abren el acta
+ * aquí. Devuelve false si el acta no aplica (p. ej. una reserva entregada
+ * antes de existir las actas): el padre hace el cambio de estado directo.
+ */
+function tryStart(type: 'delivery' | 'return'): boolean {
+  const ok = type === 'delivery' ? canDeliver.value : canReturn.value
+  if (!ok) return false
+  h.start(type)
+  return true
+}
+
+defineExpose({ tryStart })
+
 function goGuarantee() {
   document
     .getElementById('reservation-guarantee')
