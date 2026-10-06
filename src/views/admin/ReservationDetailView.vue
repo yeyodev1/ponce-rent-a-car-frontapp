@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import EmptyState from '@/components/admin/EmptyState.vue'
 import ReservationInfo from '@/components/admin/reservations/ReservationInfo.vue'
@@ -21,6 +21,14 @@ const { reservation, loading, saving, error, load, patch, addPayment, refund, op
 
 // El token solo existe al crear la reserva presencial (el API no lo vuelve a mandar).
 const shareToken = computed(() => reservation.value?.accessToken || readShareToken(id))
+
+const handover = ref<InstanceType<typeof ReservationHandover> | null>(null)
+
+/** Entregar/Completar abren el acta; si no aplica, se confirma el cambio directo. */
+function openHandover(type: 'delivery' | 'return', fallback: () => void) {
+  if (handover.value?.tryStart(type)) return
+  fallback()
+}
 
 /** "Entregar" sin unidad: se lleva al selector de unidad. */
 function goAssign() {
@@ -49,7 +57,13 @@ function goAssign() {
 
     <div v-else class="rdetail__grid">
       <div class="rdetail__main">
-        <ReservationActions :r="reservation" :saving="saving" @patch="patch" @assign="goAssign" />
+        <ReservationActions
+          :r="reservation"
+          :saving="saving"
+          @patch="patch"
+          @assign="goAssign"
+          @handover="openHandover"
+        />
         <ReservationInfo :r="reservation" />
         <ReservationVerification
           :r="reservation"
@@ -58,12 +72,18 @@ function goAssign() {
           @save="(b) => patch(b, 'Verificación guardada')"
         />
         <!-- Actas de entrega y devolución (cambian el estado: se recarga al terminar). -->
-        <ReservationHandover :r="reservation" @changed="load" />
+        <ReservationHandover ref="handover" :r="reservation" @changed="load" />
       </div>
       <div class="rdetail__side">
         <ReservationShareLink v-if="shareToken" :r="reservation" :token="shareToken" />
         <ReservationContract :r="reservation" @changed="load" />
-        <ReservationPayments :r="reservation" :saving="saving" @pay="addPayment" @refund="refund" />
+        <ReservationPayments
+          :r="reservation"
+          :saving="saving"
+          @pay="addPayment"
+          @refund="refund"
+          @changed="load"
+        />
         <ReservationGuarantee :r="reservation" @changed="load" />
         <ReservationManage :r="reservation" :saving="saving" @patch="patch" />
         <ReservationPricing :r="reservation" />
