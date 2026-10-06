@@ -6,9 +6,9 @@ Vue 3 + Vite + TypeScript + SCSS + Pinia + vue-router. Se despliega en Vercel co
 
 | | |
 |---|---|
-| Sitio | https://ponce-rent-a-car-frontapp.vercel.app |
-| Panel | https://ponce-rent-a-car-frontapp.vercel.app/admin/login |
-| API | https://ponce-rent-a-car-backapp.vercel.app/api |
+| Sitio | https://poncesrentacar.com.ec |
+| Panel | https://poncesrentacar.com.ec/admin/login |
+| API | https://api.poncesrentacar.com.ec/api |
 | Repo del backend | https://github.com/yeyodev1/ponce-rent-a-car-backapp |
 
 Cada push a `main` despliega a producción en Vercel.
