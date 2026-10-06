@@ -77,7 +77,7 @@ usePageSeo({
 
         <section v-if="category.units?.length" class="cat__section" aria-labelledby="cat-units">
           <h2 id="cat-units" v-reveal class="cat__h2">{{ t('content.category.units.title') }}</h2>
-          <CategoryUnits :units="category.units" />
+          <CategoryUnits :units="category.units" :category-slug="category.slug" />
         </section>
 
         <section class="cat__section" aria-labelledby="cat-km">
