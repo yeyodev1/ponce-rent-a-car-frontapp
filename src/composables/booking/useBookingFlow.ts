@@ -17,6 +17,7 @@ import {
 import { quote, quoteLoading, quoteOk, refreshQuote } from './useQuote'
 import { cleanLicense, driverValid, submitted, touched } from './useDriverForm'
 import { useBookingSteps } from './useBookingSteps'
+import { contractRequired } from './useContract'
 
 /**
  * Qué hace "Continuar" en cada paso y cuándo está habilitado. Los pasos solo
@@ -70,6 +71,8 @@ export function useBookingFlow() {
         return booking.documents.license && booking.documents.identity
       case 'review':
         return Boolean(booking.reservation)
+      case 'contract':
+        return Boolean(booking.reservation) && (booking.contractSigned || !contractRequired.value)
       default:
         return false
     }
@@ -78,6 +81,7 @@ export function useBookingFlow() {
   const continueLabel = computed(() => {
     if (steps.key.value === 'driver') return t('booking.driver.submit')
     if (steps.key.value === 'review') return t('booking.review.submit')
+    if (steps.key.value === 'contract') return t('booking.contract.submit')
     return t('common.actions.continue')
   })
 
@@ -161,6 +165,8 @@ export function useBookingFlow() {
       case 'review':
         track('verification_submit', { reservation: booking.reservation?.code })
         return steps.go(9)
+      case 'contract':
+        return steps.go(10)
       default:
         return steps.go(steps.step.value + 1)
     }
@@ -176,6 +182,7 @@ export function useBookingFlow() {
       res.holdExpiresAt = pub.holdExpiresAt
       res.pricing = pub.pricing
       booking.documents = { ...pub.documents }
+      booking.contractSigned = pub.contract?.status === 'signed'
       if (['confirmed', 'delivered', 'completed'].includes(pub.status)) {
         router.replace({ path: `/reserva/${res.code}`, query: { t: res.token } })
       }
