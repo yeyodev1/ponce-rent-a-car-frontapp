@@ -3,12 +3,16 @@ import { computed, ref } from 'vue'
 import StatusBadge from '../StatusBadge.vue'
 import ConfirmDialog from '../ConfirmDialog.vue'
 import PaymentForm from './PaymentForm.vue'
+import VoidPaymentDialog from '../payments/VoidPaymentDialog.vue'
+import { usePaymentVoid } from '@/composables/admin/usePaymentVoid'
+import { adminService } from '@/services/admin.service'
+import { paymentStatusesV13, voidCopy } from '@/config/admin/ops'
+import type { PaymentVoidFields } from '@/types/ops'
 import { useUserStore } from '@/stores/user'
 import {
   paymentCopy as t,
   paymentMethods,
   paymentProviders,
-  paymentStatuses,
   reservationPaymentStatuses,
 } from '@/config/admin'
 import { money } from '@/utils/format'
@@ -20,6 +24,7 @@ const props = defineProps<{ r: AdminReservation; saving?: boolean }>()
 const emit = defineEmits<{
   pay: [body: { amount: number; method: PaymentMethod; note?: string }]
   refund: [paymentId: string]
+  changed: []
 }>()
 
 const userStore = useUserStore()
@@ -36,6 +41,15 @@ function confirmRefund() {
   toRefund.value = null
   if (p) emit('refund', p._id)
 }
+
+// Tras anular, el servidor recalcula los totales: se relee la reserva y se
+// actualiza en sitio (el detalle todavía no escucha "changed").
+const voider = usePaymentVoid(async () => {
+  const { payments, amountPaid, balance, paymentStatus } = await adminService.reservation(props.r._id)
+  Object.assign(props.r, { payments, amountPaid, balance, paymentStatus })
+  emit('changed')
+})
+const voided = (p: Payment) => p as Payment & PaymentVoidFields
 
 const methodOf = (p: Payment) =>
   paymentMethods[p.method || ''] || (p.provider === 'payphone' ? `${paymentMethods.card} · ${t.online}` : paymentProviders[p.provider] || p.provider)
@@ -62,7 +76,7 @@ const methodOf = (p: Payment) =>
       <li v-for="p in payments" :key="p._id" class="rpay__item" :class="{ 'rpay__item--off': p.status !== 'approved' }">
         <div class="rpay__row">
           <strong class="rpay__amount">{{ money(p.amount, true) }}</strong>
-          <StatusBadge :status="p.status" :map="paymentStatuses" />
+          <StatusBadge :status="p.status" :map="paymentStatusesV13" />
         </div>
         <p class="rpay__meta">
           <span><i class="fa-regular fa-calendar"></i> {{ dateTime(p.approvedAt || p.createdAt) }}</span>
@@ -71,15 +85,17 @@ const methodOf = (p: Payment) =>
         </p>
         <p v-if="p.note" class="rpay__note">{{ p.note }}</p>
         <p v-if="p.refundedAt" class="rpay__note">Reembolsado el {{ dateTime(p.refundedAt) }}</p>
-        <button
-          v-if="userStore.isAdmin && p.status === 'approved'"
-          type="button"
-          class="rpay__refund"
-          :disabled="saving"
-          @click="toRefund = p"
-        >
-          <i class="fa-solid fa-rotate-left"></i> {{ t.refund }}
-        </button>
+        <p v-if="voided(p).voidedAt" class="rpay__note">
+          {{ voidCopy.voidedAt(dateTime(voided(p).voidedAt), voided(p).voidedBy?.name || '') }}: {{ voided(p).voidReason }}
+        </p>
+        <div class="rpay__acts">
+          <button v-if="userStore.isAdmin && p.status === 'approved'" type="button" class="rpay__refund" :disabled="saving" @click="toRefund = p">
+            <i class="fa-solid fa-rotate-left"></i> {{ t.refund }}
+          </button>
+          <button v-if="voider.canVoid(p)" type="button" class="rpay__refund rpay__void" :disabled="voider.saving.value" @click="voider.ask(p)">
+            <i class="fa-solid fa-ban"></i> {{ voidCopy.action }}
+          </button>
+        </div>
       </li>
     </ul>
     <p v-else class="rpay__muted">{{ t.none }}</p>
@@ -91,6 +107,13 @@ const methodOf = (p: Payment) =>
       :confirm-label="t.refund"
       @confirm="confirmRefund"
       @cancel="toRefund = null"
+    />
+    <VoidPaymentDialog
+      v-model:reason="voider.reason.value"
+      :payment="voider.target.value"
+      :error="voider.error.value"
+      @confirm="voider.confirm"
+      @cancel="voider.cancel"
     />
   </section>
 </template>
@@ -201,6 +224,14 @@ const methodOf = (p: Payment) =>
     font-size: 0.78rem;
     color: $ink-soft;
     font-style: italic;
+  }
+
+  &__acts {
+    @include flex(row, center, flex-start, 1rem);
+  }
+
+  &__void {
+    color: $ink-soft;
   }
 
   &__refund {
