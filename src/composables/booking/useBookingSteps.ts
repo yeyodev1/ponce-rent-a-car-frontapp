@@ -1,6 +1,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { booking, effectiveReturnLocation, localDays } from './useBookingState'
+import { contractRequired } from './useContract'
 
 /**
  * El paso vive en la URL (?paso=3): así el botón "atrás" del teléfono vuelve
@@ -16,6 +17,7 @@ export const STEP_KEYS = [
   'driver',
   'documents',
   'review',
+  'contract',
   'payment',
 ] as const
 export type StepKey = (typeof STEP_KEYS)[number]
@@ -38,7 +40,9 @@ export const maxReachable = computed(() => {
   if (!booking.coverage) return 4
   if (!booking.reservation) return 6
   if (!booking.documents.license || !booking.documents.identity) return 7
-  return 9
+  // Con el contrato obligatorio, el pago solo se abre tras aceptarlo.
+  if (contractRequired.value && !booking.contractSigned) return 9
+  return 10
 })
 
 export function useBookingSteps() {
