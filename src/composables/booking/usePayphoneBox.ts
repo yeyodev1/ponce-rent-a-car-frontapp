@@ -2,6 +2,7 @@ import { nextTick, ref } from 'vue'
 import { publicService } from '@/services/public.service'
 import { track } from '@/composables/useAnalytics'
 import type { CheckoutConfig } from '@/types'
+import { contractNeeded, isContractRequiredError } from './useContract'
 
 /**
  * Cajita de Pagos de Payphone (v2.0). Los recursos se cargan una sola vez y
@@ -78,6 +79,8 @@ export function usePayphoneBox(containerId = 'pp-button') {
     } catch (e) {
       status.value = 'error'
       error.value = (e as { message?: string }).message || ''
+      // Contrato obligatorio sin aceptar: la vista lleva al cliente al paso Contrato.
+      if (isContractRequiredError(e)) contractNeeded.value = true
     }
   }
 
