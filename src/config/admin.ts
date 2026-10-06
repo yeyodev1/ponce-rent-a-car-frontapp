@@ -345,6 +345,7 @@ export const menu: { title: string; items: MenuItem[] }[] = [
       { to: '/admin/flota', label: 'Flota', icon: 'fa-solid fa-car-side' },
       { to: '/admin/disponibilidad', label: 'Disponibilidad', icon: 'fa-solid fa-calendar-days' },
       { to: '/admin/tarifas', label: 'Tarifas y reglas', icon: 'fa-solid fa-tags' },
+      { to: '/admin/contratos', label: 'Contrato', icon: 'fa-solid fa-file-signature', adminOnly: true },
     ],
   },
   {
@@ -361,6 +362,7 @@ export const menu: { title: string; items: MenuItem[] }[] = [
       { to: '/admin/personal', label: 'Personal', icon: 'fa-solid fa-user-shield', adminOnly: true },
       { to: '/admin/configuracion', label: 'Configuración', icon: 'fa-solid fa-sliders' },
       { to: '/admin/integraciones', label: 'Integraciones', icon: 'fa-solid fa-plug', adminOnly: true },
+      { to: '/admin/auditoria', label: 'Registro de accesos', icon: 'fa-solid fa-clock-rotate-left', adminOnly: true },
     ],
   },
 ]
