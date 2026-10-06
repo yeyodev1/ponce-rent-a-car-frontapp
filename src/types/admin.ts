@@ -118,7 +118,7 @@ export interface CustomerDetail extends Customer {
 
 // ─── Reservas y pagos ───────────────────────────────────────────────────
 export type VehicleStatus = 'available' | 'prereserved' | 'reserved' | 'rented' | 'maintenance' | 'blocked'
-export type PaymentStatus = 'pending' | 'approved' | 'canceled' | 'error' | 'refunded'
+export type PaymentStatus = 'pending' | 'approved' | 'canceled' | 'error' | 'refunded' | 'voided'
 export type PaymentMethod = 'cash' | 'transfer' | 'card'
 /** Lo calcula el servidor comparando lo pagado contra el total; nunca se edita a mano. */
 export type ReservationPaymentStatus = 'pending' | 'partial' | 'paid' | 'refunded'
