@@ -5,7 +5,11 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/((?!assets/).*)",
+      "source": "/sitemap.xml",
+      "destination": "https://ponce-rent-a-car-backapp.vercel.app/api/public/sitemap.xml"
+    },
+    {
+      "source": "/((?!assets/|sitemap\\.xml).*)",
       "destination": "/index.html"
     }
   ],
