@@ -45,5 +45,18 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.poncesrentacar.com.ec"
+        }
+      ],
+      "destination": "https://poncesrentacar.com.ec/$1",
+      "permanent": true
+    }
   ]
 }
