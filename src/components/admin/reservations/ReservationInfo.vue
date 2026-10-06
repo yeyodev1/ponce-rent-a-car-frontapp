@@ -69,10 +69,8 @@ const details = computed(() =>
     },
     {
       label: 'Contrato',
-      value:
-        props.r.contract?.status && props.r.contract.status !== 'not_required'
-          ? props.r.contract.status
-          : '',
+      // Sin aceptar el API deja "not_required": se muestra como pendiente.
+      value: props.r.contract?.status === 'signed' ? 'Aceptado en línea' : 'Pendiente de aceptación',
     },
     { label: 'Creada', value: dateTime(props.r.createdAt) },
   ].filter((d) => d.value),
