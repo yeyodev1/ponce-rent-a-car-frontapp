@@ -1,0 +1,132 @@
+/**
+ * Copy del panel para contrato (plantillas y aceptación) y registro de accesos.
+ * Solo español: el panel lo usa el equipo de Ponce's.
+ */
+
+export const contractCopy = {
+  card: {
+    title: 'Contrato',
+    signed: 'Aceptado en línea',
+    pending: 'Pendiente de aceptación',
+    version: (n: number | null) => (n ? `Versión ${n}` : 'Sin versión'),
+    acceptedBy: 'Aceptado por',
+    document: 'Documento',
+    date: 'Fecha',
+    ip: 'IP',
+    device: 'Navegador',
+    hash: 'Huella SHA-256',
+    viewText: 'Ver texto',
+    hideText: 'Ocultar texto',
+    download: 'Descargar PDF',
+    downloading: 'Descargando',
+    copyHash: 'Copiar huella',
+    hashCopied: 'Huella copiada',
+    loadError: 'No se pudo cargar el contrato',
+    retry: 'Reintentar',
+    optional: 'El contrato en línea es opcional (configuración).',
+    confirmedWithout:
+      'Esta reserva se confirmó sin contrato aceptado en línea. Verifica que exista el contrato firmado en papel.',
+    willConfirmWithout:
+      'Si la confirmas desde el panel sin contrato en línea, asegúrate de firmar el contrato en papel al entregar el vehículo.',
+    draftNote: 'Mientras no se acepte, el texto se genera con la plantilla activa y los datos actuales de la reserva.',
+  },
+  templates: {
+    title: 'Contrato de alquiler',
+    subtitle:
+      'Edita el texto en español e inglés. Cada vez que guardas se publica una versión nueva; los contratos ya aceptados conservan el texto que firmaron.',
+    active: 'Versión activa',
+    editor: 'Editor',
+    titleLabel: 'Título del contrato',
+    bodyLabel: 'Texto del contrato',
+    bodyHint: 'Usa una línea que empiece con "## " para el título de cada cláusula. Una línea en blanco separa párrafos.',
+    variables: 'Variables',
+    variablesHint: 'Toca una variable para insertarla donde está el cursor.',
+    preview: 'Vista previa',
+    previewReservation: 'Reserva para la vista previa',
+    previewNone: 'Datos de ejemplo',
+    previewLang: 'Idioma',
+    previewRun: 'Actualizar vista previa',
+    previewEmpty: 'Toca "Actualizar vista previa" para ver el contrato con datos reales.',
+    save: 'Guardar como versión nueva',
+    saving: 'Publicando',
+    saved: (n: number) => `Versión ${n} publicada`,
+    confirmTitle: '¿Publicar una versión nueva?',
+    confirmMessage:
+      'Los contratos que se generen desde ahora usarán este texto. Los que ya fueron aceptados no cambian.',
+    noChanges: 'No hay cambios respecto de la versión activa.',
+    history: 'Historial de versiones',
+    historyHint: 'Solo lectura. Las versiones anteriores no se pueden editar.',
+    by: 'por',
+    view: 'Ver',
+    close: 'Cerrar',
+    loadError: 'No se pudieron cargar las plantillas',
+    es: 'Español',
+    en: 'Inglés',
+  },
+}
+
+export const auditCopy = {
+  title: 'Registro de accesos',
+  subtitle: 'Quién entró al panel, qué cambió y desde dónde. Se conserva un año.',
+  search: 'Buscar en el resumen, persona o IP',
+  actor: 'Persona',
+  allActors: 'Todas las personas',
+  action: 'Acción',
+  allActions: 'Todas las acciones',
+  entity: 'Entidad',
+  allEntities: 'Todas las entidades',
+  from: 'Desde',
+  to: 'Hasta',
+  clear: 'Limpiar filtros',
+  export: 'Exportar CSV',
+  exporting: 'Exportando',
+  exported: 'CSV descargado',
+  empty: 'No hay registros con estos filtros',
+  failed: 'Fallido',
+  ok: 'Correcto',
+  system: 'Sin sesión',
+  columns: { at: 'Fecha', actor: 'Persona', summary: 'Acción', ip: 'IP', result: 'Resultado' },
+}
+
+/** Grupos de acciones para el filtro (el API agrupa por prefijo: "reservation" incluye reservation.*). */
+export const auditActions: Record<string, string> = {
+  login: 'Inicio de sesión',
+  login_failed: 'Inicio de sesión fallido',
+  reservation: 'Reservas',
+  payment: 'Pagos',
+  guarantee: 'Garantía',
+  inspection: 'Actas',
+  contract: 'Contrato',
+  document: 'Documentos del conductor',
+  vehicle: 'Unidades',
+  category: 'Categorías',
+  lead: 'Leads',
+  customer: 'Clientes',
+  staff: 'Personal',
+  settings: 'Configuración',
+  export: 'Exportaciones CSV',
+  audit: 'Registro de accesos',
+  content: 'Contenido',
+}
+
+export const auditEntities: Record<string, string> = {
+  reservation: 'Reserva',
+  payment: 'Pago',
+  inspection: 'Acta',
+  contract: 'Contrato',
+  vehicle: 'Unidad',
+  category: 'Categoría',
+  lead: 'Lead',
+  customer: 'Cliente',
+  staff: 'Personal',
+  settings: 'Configuración',
+  coverage: 'Cobertura',
+  extra: 'Extra',
+  content: 'Contenido',
+  media: 'Imagen',
+  partner: 'Socio',
+  export: 'Exportación',
+  audit: 'Registro',
+}
+
+export const auditRoles: Record<string, string> = { admin: 'Administrador', employee: 'Empleado' }
