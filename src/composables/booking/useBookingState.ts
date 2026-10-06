@@ -57,6 +57,8 @@ export interface BookingState {
   driver: DriverDraft
   reservation: BookingReservation | null
   documents: { license: boolean; identity: boolean }
+  /** Contrato aceptado en línea (paso Contrato). El checkout lo exige si así está configurado. */
+  contractSigned: boolean
   payMode: 'deposit' | 'full'
 }
 
@@ -92,6 +94,7 @@ function blank(): BookingState {
     driver: blankDriver(),
     reservation: null,
     documents: { license: false, identity: false },
+    contractSigned: false,
     payMode: 'deposit',
   }
 }
@@ -171,6 +174,7 @@ export function currentSignature(): string {
 export function clearReservation() {
   booking.reservation = null
   booking.documents = { license: false, identity: false }
+  booking.contractSigned = false
 }
 
 /** Tras un pago aprobado se empieza de cero, pero sin volver a pedir los datos del conductor. */
@@ -204,6 +208,7 @@ export function adoptReservation(res: PublicReservation, token: string) {
     coverage: res.coverage,
     extras: Object.fromEntries(res.extras.map((e) => [e.code, e.quantity])),
     documents: { ...res.documents },
+    contractSigned: res.contract?.status === 'signed',
   })
   booking.reservation = {
     code: res.code,
