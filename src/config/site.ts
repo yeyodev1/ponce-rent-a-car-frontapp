@@ -6,7 +6,7 @@ export const site = {
   name: "Ponce's Rent a Car",
   shortName: "Ponce's",
   slogan: { es: 'Tu camino, tu elección', en: 'Your road, your choice' },
-  url: 'https://poncesrentacar.com',
+  url: 'https://poncesrentacar.com.ec',
   email: '',
   // Solo dígitos con código de país
   whatsapp: '593998119853',
