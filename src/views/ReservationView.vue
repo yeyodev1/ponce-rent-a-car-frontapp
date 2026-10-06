@@ -11,7 +11,9 @@ import AnimatedCheck from '@/components/booking/AnimatedCheck.vue'
 import HoldTimer from '@/components/booking/HoldTimer.vue'
 import ReservationFacts from '@/components/booking/ReservationFacts.vue'
 import ReservationContactForm from '@/components/booking/ReservationContactForm.vue'
+import ReservationContractCard from '@/components/contract/ReservationContractCard.vue'
 import { adoptReservation } from '@/composables/booking/useBookingState'
+import { contractRequired } from '@/composables/booking/useContract'
 import type { PublicReservation } from '@/types'
 
 /** /reserva/:code?t=token — estado público de una reserva, sin cuenta. */
@@ -53,7 +55,6 @@ const title = computed(() =>
 const waLink = computed(() => whatsappLink(t('booking.reservation.whatsappMsg', { code: code.value })))
 // Con la reserva cerrada ya no hay nada que avisar: el formulario de contacto se oculta.
 const editable = computed(() => Boolean(res.value) && !['completed', 'cancelled', 'expired'].includes(res.value!.status))
-const contractReady = computed(() => res.value?.contract?.status === 'ready' && Boolean(res.value.contract.fileUrl))
 
 async function load() {
   loading.value = true
@@ -78,7 +79,10 @@ onMounted(() => {
 function continueBooking() {
   if (!res.value) return
   adoptReservation(res.value, token.value)
-  router.push({ path: '/reservar', query: { paso: res.value.status === 'pending_documents' ? '7' : '9' } })
+  // Con documentos: al contrato si falta aceptarlo (y es obligatorio); si no, directo al pago.
+  const signed = res.value.contract?.status === 'signed'
+  const paso = res.value.status === 'pending_documents' ? '7' : contractRequired.value && !signed ? '9' : '10'
+  router.push({ path: '/reservar', query: { paso } })
 }
 
 const bookAgain = () => router.push({ path: '/reservar', query: { categoria: res.value?.category.slug || undefined } })
@@ -136,6 +140,8 @@ const bookAgain = () => router.push({ path: '/reservar', query: { categoria: res
 
       <ReservationFacts :res="res" />
 
+      <ReservationContractCard :code="res.code" :token="token" :active="editable" @signed="res.contract = { ...res.contract, status: 'signed' }" />
+
       <ReservationContactForm v-if="editable" :res="res" :token="token" @updated="res = $event" />
 
       <div class="resv__actions">
@@ -145,13 +151,6 @@ const bookAgain = () => router.push({ path: '/reservar', query: { categoria: res
         <a :href="waLink" target="_blank" rel="noopener" class="btn btn--whatsapp btn--block" @click="track('whatsapp_open', { source: 'reservation', reservation: res.code })">
           <i class="fa-brands fa-whatsapp"></i>{{ t('booking.reservation.contact') }}
         </a>
-        <a v-if="contractReady" :href="res.contract.fileUrl" target="_blank" rel="noopener" class="btn btn--dark btn--block">
-          <i class="fa-solid fa-file-signature"></i>{{ t('booking.reservation.contract') }}
-        </a>
-        <button v-else type="button" class="btn btn--ghost btn--block resv__soon" disabled>
-          <i class="fa-solid fa-file-signature"></i>{{ t('booking.reservation.contract') }}
-          <span class="chip">{{ t('booking.reservation.soon') }}</span>
-        </button>
       </div>
     </div>
   </section>
@@ -243,10 +242,6 @@ const bookAgain = () => router.push({ path: '/reservar', query: { categoria: res
 
   &__next {
     align-items: center;
-  }
-
-  &__soon .chip {
-    margin-left: 0.3rem;
   }
 
   &__ghost-circle {
