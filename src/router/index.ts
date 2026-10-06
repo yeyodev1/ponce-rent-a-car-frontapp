@@ -42,6 +42,7 @@ const routes: Array<RouteRecordRaw> = [
   // Flota y contenido
   { path: '/vehiculos', name: 'Fleet', component: () => import('@/views/FleetView.vue'), meta: { seoKey: 'fleet' } },
   { path: '/vehiculos/:slug', name: 'Category', component: () => import('@/views/CategoryView.vue') },
+  { path: '/vehiculos/:slug/:unit', name: 'Unit', component: () => import('@/views/UnitView.vue') },
   {
     path: '/alquiler-autos-aeropuerto-guayaquil',
     name: 'Airport',
